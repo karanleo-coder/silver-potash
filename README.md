@@ -44,7 +44,7 @@ second join attempt is politely rejected until the first disconnects.
 
 ## Download
 
-> **[Download the latest WheelHost-Setup.exe](https://github.com/<your-username>/<your-repo>/releases/latest)**
+> **[Download the latest WheelHost-Setup.exe](https://github.com/karanleo-coder/silver-potash/releases/latest)**
 > *(replace `<your-username>/<your-repo>` once this is pushed to your own GitHub repo — see
 > [Releasing a new version](#releasing-a-new-version) below)*
 
