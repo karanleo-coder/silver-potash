@@ -1,0 +1,6 @@
+host/WheelHost/bin/
+host/WheelHost/obj/
+*.user
+publish/
+installer/Output/
+installer/redist/*.exe

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="WheelHost" />
+<meta name="theme-color" content="#0a0c11" />
+<title>WheelHost Controller</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ===================== JOIN SCREEN ===================== -->
+<section id="join-screen" class="screen">
+  <div class="join-card">
+    <div class="brand">
+      <div class="brand-wheel-icon">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="8"/><circle cx="50" cy="50" r="10" fill="currentColor"/><line x1="50" y1="12" x2="50" y2="34" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><line x1="21" y1="66" x2="38" y2="54" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><line x1="79" y1="66" x2="62" y2="54" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>
+      </div>
+      <h1>WheelHost</h1>
+      <p class="subtitle">Enter the code shown on your PC to connect this device as a wheel</p>
+    </div>
+
+    <form id="join-form" autocomplete="off">
+      <label class="field-label">Join code</label>
+      <div id="code-boxes" class="code-boxes">
+        <input class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" />
+        <input class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" />
+        <input class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" />
+        <input class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" />
+        <input class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" />
+        <input class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" />
+      </div>
+      <input type="hidden" id="code-input" />
+
+      <label for="name-input" class="field-label">Your name</label>
+      <input id="name-input" name="name" maxlength="16" placeholder="Driver" autocomplete="off" />
+
+      <button type="submit" id="connect-btn" class="primary-btn">
+        <span class="btn-label">Connect</span>
+        <span class="btn-spinner" aria-hidden="true"></span>
+      </button>
+    </form>
+
+    <p id="join-status" class="status-text"></p>
+  </div>
+</section>
+
+<!-- ===================== MOTION PERMISSION OVERLAY ===================== -->
+<section id="motion-gate" class="screen hidden">
+  <div class="join-card">
+    <h2>Enable motion sensors</h2>
+    <p class="subtitle">Your browser needs permission to read the tilt sensor before the wheel will work.</p>
+    <button id="enable-motion-btn" class="primary-btn">Enable Motion &amp; Start</button>
+  </div>
+</section>
+
+<!-- ===================== ROTATE PROMPT ===================== -->
+<section id="rotate-gate" class="screen hidden">
+  <div class="join-card">
+    <div class="rotate-icon">&#8635;</div>
+    <h2>Rotate your device</h2>
+    <p class="subtitle">Hold it landscape, like a steering wheel</p>
+  </div>
+</section>
+
+<!-- ===================== WHEEL SCREEN ===================== -->
+<section id="wheel-screen" class="screen hidden">
+
+  <header class="hud">
+    <div class="hud-item">
+      <span id="conn-dot" class="dot"></span>
+      <span id="conn-label">Connected</span>
+    </div>
+    <div class="hud-item hud-ping"><span id="ping-label">-- ms</span></div>
+    <button id="settings-btn" class="icon-btn" aria-label="Settings">&#9881;</button>
+  </header>
+
+  <div class="wheel-stage">
+    <button id="calibrate-btn" class="calibrate-fab">Calibrate center</button>
+
+    <button class="paddle paddle-left" data-slot="gearDown">
+      <span class="paddle-label" data-label-for="gearDown"></span>
+    </button>
+    <button class="paddle paddle-right" data-slot="gearUp">
+      <span class="paddle-label" data-label-for="gearUp"></span>
+    </button>
+
+    <div class="wheel-wrap">
+      <svg id="wheel-svg" viewBox="0 0 200 200" class="wheel-graphic">
+        <circle cx="100" cy="100" r="86" fill="none" stroke="#2a2f3a" stroke-width="14"/>
+        <circle cx="100" cy="100" r="86" fill="none" stroke="url(#rim)" stroke-width="14"/>
+        <circle cx="100" cy="100" r="22" fill="#151821" stroke="#3a4150" stroke-width="3"/>
+        <line x1="100" y1="26" x2="100" y2="76" stroke="#e8543f" stroke-width="12" stroke-linecap="round"/>
+        <line x1="34" y1="140" x2="70" y2="116" stroke="#4a5468" stroke-width="12" stroke-linecap="round"/>
+        <line x1="166" y1="140" x2="130" y2="116" stroke="#4a5468" stroke-width="12" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#3d4557"/>
+            <stop offset="1" stop-color="#20242e"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <button class="face-btn face-btn-tl" data-slot="extra1">
+      <span class="paddle-label" data-label-for="extra1"></span>
+    </button>
+    <button class="face-btn face-btn-tr" data-slot="extra2">
+      <span class="paddle-label" data-label-for="extra2"></span>
+    </button>
+
+    <button class="pedal pedal-brake" data-slot="brake">
+      <span class="paddle-label" data-label-for="brake"></span>
+    </button>
+    <button class="pedal pedal-accel" data-slot="accelerate">
+      <span class="paddle-label" data-label-for="accelerate"></span>
+    </button>
+
+    <button class="handbrake-btn" data-slot="handbrake">
+      <span class="paddle-label" data-label-for="handbrake"></span>
+    </button>
+  </div>
+</section>
+
+<!-- ===================== SETTINGS PANEL ===================== -->
+<section id="settings-panel" class="sheet hidden">
+  <div class="sheet-inner">
+    <div class="sheet-header">
+      <h2>Customize</h2>
+      <button id="close-settings-btn" class="icon-btn" aria-label="Close">&#10005;</button>
+    </div>
+
+    <div class="settings-group">
+      <label class="field-label">Steering sensitivity</label>
+      <input id="sensitivity-slider" type="range" min="10" max="70" value="35" />
+      <div class="range-value"><span id="sensitivity-value">35</span>&deg; = full lock</div>
+    </div>
+
+    <div class="settings-group">
+      <label class="field-label">Button mapping</label>
+      <p class="hint">Assign what each control on the wheel does.</p>
+      <div id="mapping-list" class="mapping-list"></div>
+    </div>
+
+    <button id="disconnect-btn" class="danger-btn">Disconnect</button>
+  </div>
+</section>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

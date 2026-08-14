@@ -1,0 +1,65 @@
+name: Release
+
+# Push a tag like "v1.0.0" to build and publish WheelHost-Setup.exe as a GitHub Release asset.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish self-contained WheelHost.exe
+        run: >
+          dotnet publish host/WheelHost/WheelHost.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:Version=${{ steps.version.outputs.version }}
+          -o publish
+
+      - name: Download latest ViGEmBus installer
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          New-Item -ItemType Directory -Force -Path installer/redist | Out-Null
+          gh release download --repo ViGEm/ViGEmBus --pattern "*x64*.exe" --dir installer/redist --clobber
+          $file = Get-ChildItem installer/redist -Filter *.exe | Select-Object -First 1
+          if ($null -eq $file) { throw "No ViGEmBus x64 installer asset found" }
+          Rename-Item $file.FullName "ViGEmBusSetup_x64.exe"
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
+            "/DMyAppVersion=${{ steps.version.outputs.version }}" `
+            installer\WheelHost.iss
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/Output/WheelHost-Setup.exe
+          generate_release_notes: true

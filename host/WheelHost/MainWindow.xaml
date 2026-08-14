@@ -1,0 +1,164 @@
+<Window x:Class="WheelHost.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WheelHost" Height="840" Width="540" MinWidth="480" MinHeight="640"
+        WindowStartupLocation="CenterScreen">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+        <StackPanel>
+
+            <!-- ===================== Header ===================== -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="WheelHost" FontSize="24" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Ellipse x:Name="ServerStatusDot" Style="{StaticResource StatusDot}" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="ServerStatusText" Text="Server stopped" Style="{StaticResource MutedText}"/>
+                    </StackPanel>
+                </StackPanel>
+                <Button Grid.Column="1" x:Name="StartStopButton" Content="Start Server"
+                        Style="{StaticResource PrimaryButton}" Click="StartStopButton_Click"
+                        VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- ===================== ViGEm warning ===================== -->
+            <Border x:Name="ViGemWarningBorder" Style="{StaticResource CardBorder}"
+                    BorderBrush="{StaticResource BadBrush}" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Virtual controller unavailable" FontWeight="SemiBold" Foreground="{StaticResource BadBrush}"/>
+                    <TextBlock x:Name="ViGemWarningText" TextWrapping="Wrap" Margin="0,6,0,10" Style="{StaticResource MutedText}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Retry" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                                Click="RetryVigem_Click"/>
+                        <Button Content="Download ViGEmBus driver" Style="{StaticResource SecondaryButton}"
+                                Click="OpenVigemDownload_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Connection card ===================== -->
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Join Code" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock x:Name="JoinCodeText" Text="------" FontSize="34" FontWeight="Bold"
+                                   FontFamily="Consolas" Foreground="{StaticResource AccentBrush}"/>
+                        <TextBlock x:Name="LanAddressText" Text="Server not running" Style="{StaticResource MutedText}" Margin="0,8,0,14"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="New code" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                                    Click="NewCode_Click"/>
+                            <Button Content="Copy join URL" Style="{StaticResource SecondaryButton}"
+                                    Click="CopyUrl_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="150" Height="150" Background="White" CornerRadius="10"
+                            VerticalAlignment="Top">
+                        <Image x:Name="QrImage" Margin="8"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- ===================== Device status card ===================== -->
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Device" Style="{StaticResource SectionTitle}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="DeviceStatusDot" Style="{StaticResource StatusDot}" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="DeviceStatusText" Text="No device connected"/>
+                    </StackPanel>
+                    <TextBlock x:Name="DeviceLastSeenText" Style="{StaticResource MutedText}" Margin="0,6,0,14"/>
+                    <Button x:Name="DisconnectDeviceButton" Content="Disconnect device"
+                            Style="{StaticResource SecondaryButton}" HorizontalAlignment="Left"
+                            Click="DisconnectDevice_Click" IsEnabled="False"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Live input preview ===================== -->
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Live Input" Style="{StaticResource SectionTitle}"/>
+
+                    <TextBlock Text="Steering" Style="{StaticResource MutedText}" Margin="0,0,0,6"/>
+                    <Border Height="14" CornerRadius="7" Background="{StaticResource Panel2Brush}"
+                            BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1">
+                        <Grid x:Name="SteeringTrack">
+                            <Border Width="2" Background="{StaticResource BorderBrush2}" HorizontalAlignment="Center"/>
+                            <Ellipse x:Name="SteeringThumb" Width="18" Height="18" Fill="{StaticResource AccentBrush}"
+                                     HorizontalAlignment="Left" Margin="0,-2,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="Buttons" Style="{StaticResource MutedText}" Margin="0,18,0,6"/>
+                    <UniformGrid Columns="4" Rows="2">
+                        <Border x:Name="Chip_Accelerate" Style="{StaticResource InputChip}"><TextBlock Text="Accel" Style="{StaticResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Brake" Style="{StaticResource InputChip}"><TextBlock Text="Brake" Style="{StaticResource ChipText}"/></Border>
+                        <Border x:Name="Chip_GearUp" Style="{StaticResource InputChip}"><TextBlock Text="Gear+" Style="{StaticResource ChipText}"/></Border>
+                        <Border x:Name="Chip_GearDown" Style="{StaticResource InputChip}"><TextBlock Text="Gear-" Style="{StaticResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Handbrake" Style="{StaticResource InputChip}"><TextBlock Text="H-Brake" Style="{StaticResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Extra1" Style="{StaticResource InputChip}"><TextBlock Text="Extra 1" Style="{StaticResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Extra2" Style="{StaticResource InputChip}"><TextBlock Text="Extra 2" Style="{StaticResource ChipText}"/></Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Mapping editor ===================== -->
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Button Mapping" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="Choose which Xbox controller element each logical action drives." Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,14"/>
+
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Accelerate" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="Combo_Accelerate" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Brake" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="Combo_Brake" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Gear Up" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="Combo_GearUp" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Gear Down" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="Combo_GearDown" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Handbrake" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="Combo_Handbrake" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Extra 1" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="Combo_Extra1" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Extra 2" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="Combo_Extra2" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Save mapping" Style="{StaticResource PrimaryButton}" Margin="0,0,10,0"
+                                Click="SaveMapping_Click"/>
+                        <Button Content="Reset to defaults" Style="{StaticResource SecondaryButton}"
+                                Click="ResetMapping_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>

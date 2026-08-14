@@ -1,0 +1,1 @@
+This directory holds the ViGEmBus installer downloaded at CI build time (see .github/workflows/release.yml). Not committed to the repo.
