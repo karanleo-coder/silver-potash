@@ -101,6 +101,30 @@
     </Style>
 
     <!-- ===================== ComboBox ===================== -->
+    <!-- The default WPF ComboBoxItem template ignores the ComboBox's own Foreground/Background
+         for its dropdown popup, so without this it renders light text on the system's default
+         (light) popup background — unreadable. Explicitly painting each row fixes it regardless
+         of the popup's own border/background. -->
+    <Style x:Key="DarkComboBoxItem" TargetType="ComboBoxItem">
+        <Setter Property="Background" Value="{StaticResource Panel2Brush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Padding" Value="10,7"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Bg" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource AccentBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="ComboBox">
         <Setter Property="Background" Value="{StaticResource Panel2Brush}"/>
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
@@ -108,6 +132,8 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="8,5"/>
         <Setter Property="MinWidth" Value="150"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItem}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
     <!-- ===================== Status pill ===================== -->
