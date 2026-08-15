@@ -2,6 +2,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using WheelHost.Models;
 using WheelHost.Services;
 
@@ -243,7 +245,11 @@ public partial class MainWindow : Window
 
     private void OnSteeringChanged(double value)
     {
-        Dispatcher.Invoke(() => UpdateSteeringThumb(value));
+        Dispatcher.Invoke(() =>
+        {
+            UpdateSteeringThumb(value);
+            PreviewWheelRotate.Angle = value * 90;
+        });
     }
 
     private void OnButtonChanged(ButtonAction action, bool pressed)
@@ -252,7 +258,50 @@ public partial class MainWindow : Window
         {
             if (_chips.TryGetValue(action, out var chip))
                 chip.Background = (Brush)FindResource(pressed ? "AccentBrush" : "Panel2Brush");
+
+            if (action == ButtonAction.Accelerate) SetAcceleratePreview(pressed);
+            else if (action == ButtonAction.Brake) SetBrakePreview(pressed);
         });
+    }
+
+    private void SetAcceleratePreview(bool active)
+    {
+        SpeedLines.BeginAnimation(OpacityProperty, new DoubleAnimation(active ? 1 : 0, TimeSpan.FromMilliseconds(200)));
+
+        if (active)
+        {
+            var spinFl = new DoubleAnimation(0, 360, TimeSpan.FromMilliseconds(450)) { RepeatBehavior = RepeatBehavior.Forever };
+            var spinFr = new DoubleAnimation(0, 360, TimeSpan.FromMilliseconds(450)) { RepeatBehavior = RepeatBehavior.Forever };
+            WheelFLRotate.BeginAnimation(RotateTransform.AngleProperty, spinFl);
+            WheelFRRotate.BeginAnimation(RotateTransform.AngleProperty, spinFr);
+        }
+        else
+        {
+            WheelFLRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+            WheelFRRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+        }
+    }
+
+    private void SetBrakePreview(bool active)
+    {
+        if (active)
+        {
+            WheelFLRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+            WheelFRRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+            CarGlow.Effect = new DropShadowEffect
+            {
+                Color = (Color)ColorConverter.ConvertFromString("#FF4D4F")!,
+                BlurRadius = 30,
+                ShadowDepth = 0,
+                Opacity = 0.85,
+            };
+            CarGlow.Background = new SolidColorBrush(Color.FromArgb(40, 0xFF, 0x4D, 0x4F));
+        }
+        else
+        {
+            CarGlow.Effect = null;
+            CarGlow.Background = Brushes.Transparent;
+        }
     }
 
     private void UpdateSteeringThumb(double value)
@@ -269,6 +318,9 @@ public partial class MainWindow : Window
     private void ResetLivePreview()
     {
         UpdateSteeringThumb(0);
+        PreviewWheelRotate.Angle = 0;
+        SetAcceleratePreview(false);
+        SetBrakePreview(false);
         foreach (var chip in _chips.Values)
             chip.Background = (Brush)FindResource("Panel2Brush");
     }

@@ -14,7 +14,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="WheelHost" FontSize="24" FontWeight="Bold"/>
+                    <TextBlock Text="WheelHost" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Ellipse x:Name="ServerStatusDot" Style="{DynamicResource StatusDot}" Margin="0,0,6,0"/>
                         <TextBlock x:Name="ServerStatusText" Text="Server stopped" Style="{DynamicResource MutedText}"/>
@@ -76,7 +76,7 @@
                     <TextBlock Text="Device" Style="{DynamicResource SectionTitle}"/>
                     <StackPanel Orientation="Horizontal">
                         <Ellipse x:Name="DeviceStatusDot" Style="{DynamicResource StatusDot}" Margin="0,0,8,0"/>
-                        <TextBlock x:Name="DeviceStatusText" Text="No device connected"/>
+                        <TextBlock x:Name="DeviceStatusText" Text="No device connected" Foreground="{DynamicResource TextBrush}"/>
                     </StackPanel>
                     <TextBlock x:Name="DeviceLastSeenText" Style="{DynamicResource MutedText}" Margin="0,6,0,14"/>
                     <Button x:Name="DisconnectDeviceButton" Content="Disconnect device"
@@ -110,6 +110,67 @@
                         <Border x:Name="Chip_Extra1" Style="{DynamicResource InputChip}"><TextBlock Text="Extra 1" Style="{DynamicResource ChipText}"/></Border>
                         <Border x:Name="Chip_Extra2" Style="{DynamicResource InputChip}"><TextBlock Text="Extra 2" Style="{DynamicResource ChipText}"/></Border>
                     </UniformGrid>
+
+                    <TextBlock Text="Preview" Style="{DynamicResource MutedText}" Margin="0,18,0,6"/>
+                    <Grid Height="110">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Steering wheel: rotates live with the steering value -->
+                        <Grid Grid.Column="0" Width="90" Height="90" Margin="0,0,24,0" RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <RotateTransform x:Name="PreviewWheelRotate" Angle="0"/>
+                            </Grid.RenderTransform>
+                            <Ellipse Width="90" Height="90" Stroke="{DynamicResource BorderBrush2}" StrokeThickness="10" Fill="Transparent"/>
+                            <Ellipse Width="90" Height="90" Stroke="{DynamicResource AccentBrush}" StrokeThickness="3"
+                                     StrokeDashArray="1 3" Opacity="0.6" Fill="Transparent"/>
+                            <Rectangle Width="7" Height="36" Fill="{DynamicResource BorderBrush2}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,3,0,0" RadiusX="3" RadiusY="3"/>
+                            <Rectangle Width="7" Height="30" Fill="{DynamicResource BorderBrush2}" HorizontalAlignment="Center"
+                                       VerticalAlignment="Bottom" Margin="0,0,0,3" RadiusX="3" RadiusY="3" RenderTransformOrigin="0.5,1">
+                                <Rectangle.RenderTransform><RotateTransform Angle="35"/></Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Width="7" Height="30" Fill="{DynamicResource BorderBrush2}" HorizontalAlignment="Center"
+                                       VerticalAlignment="Bottom" Margin="0,0,0,3" RadiusX="3" RadiusY="3" RenderTransformOrigin="0.5,1">
+                                <Rectangle.RenderTransform><RotateTransform Angle="-35"/></Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Ellipse Width="28" Height="28" Fill="{DynamicResource Panel2Brush}" Stroke="{DynamicResource BorderBrush2}" StrokeThickness="2"/>
+                        </Grid>
+
+                        <!-- Car: blue speed lines + spinning wheels on accelerate, red glow + stopped wheels on brake -->
+                        <Grid Grid.Column="1">
+                            <StackPanel x:Name="SpeedLines" Orientation="Vertical" VerticalAlignment="Center"
+                                        HorizontalAlignment="Left" Opacity="0" Margin="4,0,0,0">
+                                <Rectangle Width="42" Height="4" Fill="#4FA8FF" Margin="0,3" RadiusX="2" RadiusY="2"/>
+                                <Rectangle Width="28" Height="4" Fill="#4FA8FF" Margin="0,3" RadiusX="2" RadiusY="2"/>
+                                <Rectangle Width="36" Height="4" Fill="#4FA8FF" Margin="0,3" RadiusX="2" RadiusY="2"/>
+                            </StackPanel>
+
+                            <Border x:Name="CarGlow" Width="160" Height="76" CornerRadius="18"
+                                    Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                            <Grid Width="150" Height="66" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Border CornerRadius="14" Background="{DynamicResource Panel2Brush}"
+                                        BorderBrush="{DynamicResource BorderBrush2}" BorderThickness="1.5"/>
+                                <Border CornerRadius="8" Background="{DynamicResource BgBrush}" Width="72" Height="24"
+                                        HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,7,0,0"/>
+                                <Ellipse x:Name="WheelFL" Width="20" Height="20" Fill="#22262F"
+                                         Stroke="{DynamicResource BorderBrush2}" StrokeThickness="2"
+                                         HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16,0,0,-8"
+                                         RenderTransformOrigin="0.5,0.5">
+                                    <Ellipse.RenderTransform><RotateTransform x:Name="WheelFLRotate"/></Ellipse.RenderTransform>
+                                </Ellipse>
+                                <Ellipse x:Name="WheelFR" Width="20" Height="20" Fill="#22262F"
+                                         Stroke="{DynamicResource BorderBrush2}" StrokeThickness="2"
+                                         HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,-8"
+                                         RenderTransformOrigin="0.5,0.5">
+                                    <Ellipse.RenderTransform><RotateTransform x:Name="WheelFRRotate"/></Ellipse.RenderTransform>
+                                </Ellipse>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </StackPanel>
             </Border>
 
@@ -121,37 +182,37 @@
 
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="Accelerate" VerticalAlignment="Center"/>
+                        <TextBlock Text="Accelerate" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                         <ComboBox x:Name="Combo_Accelerate" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
                     </Grid>
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="Brake" VerticalAlignment="Center"/>
+                        <TextBlock Text="Brake" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                         <ComboBox x:Name="Combo_Brake" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
                     </Grid>
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="Gear Up" VerticalAlignment="Center"/>
+                        <TextBlock Text="Gear Up" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                         <ComboBox x:Name="Combo_GearUp" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
                     </Grid>
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="Gear Down" VerticalAlignment="Center"/>
+                        <TextBlock Text="Gear Down" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                         <ComboBox x:Name="Combo_GearDown" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
                     </Grid>
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="Handbrake" VerticalAlignment="Center"/>
+                        <TextBlock Text="Handbrake" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                         <ComboBox x:Name="Combo_Handbrake" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
                     </Grid>
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="Extra 1" VerticalAlignment="Center"/>
+                        <TextBlock Text="Extra 1" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                         <ComboBox x:Name="Combo_Extra1" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
                     </Grid>
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="Extra 2" VerticalAlignment="Center"/>
+                        <TextBlock Text="Extra 2" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                         <ComboBox x:Name="Combo_Extra2" Grid.Column="1" SelectionChanged="MappingCombo_SelectionChanged"/>
                     </Grid>
 

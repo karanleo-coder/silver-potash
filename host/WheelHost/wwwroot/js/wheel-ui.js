@@ -83,6 +83,56 @@ export class WheelUI {
     }
   }
 
+  // Lets the driver grab the wheel graphic and rotate it directly with a finger — a
+  // touch-drag steering input that works on every device regardless of whether tilt
+  // sensors (DeviceOrientation) are available or granted. Runs alongside tilt; whichever
+  // fires most recently wins, since both just report a normalized [-1, 1] steer value.
+  bindWheelDrag(onSteerChange) {
+    const wrap = document.querySelector(".wheel-wrap");
+    if (!wrap) return;
+
+    let dragging = false;
+    let startAngle = 0;
+    let startDeg = this._dragDeg ?? 0;
+
+    const angleAt = (evt) => {
+      const rect = wrap.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      return Math.atan2(evt.clientY - cy, evt.clientX - cx) * (180 / Math.PI);
+    };
+
+    wrap.addEventListener("pointerdown", (evt) => {
+      dragging = true;
+      wrap.setPointerCapture(evt.pointerId);
+      startAngle = angleAt(evt);
+      startDeg = this._dragDeg ?? 0;
+    });
+
+    wrap.addEventListener("pointermove", (evt) => {
+      if (!dragging) return;
+      const delta = angleAt(evt) - startAngle;
+      const deg = Math.max(-MAX_VISUAL_ANGLE_DEG, Math.min(MAX_VISUAL_ANGLE_DEG, startDeg + delta));
+      this._dragDeg = deg;
+      const normalized = deg / MAX_VISUAL_ANGLE_DEG;
+      this.setWheelAngle(normalized);
+      onSteerChange(normalized);
+    });
+
+    const endDrag = (evt) => {
+      dragging = false;
+      try { wrap.releasePointerCapture(evt.pointerId); } catch { /* already released */ }
+    };
+    wrap.addEventListener("pointerup", endDrag);
+    wrap.addEventListener("pointercancel", endDrag);
+  }
+
+  resetWheelDrag(onSteerChange) {
+    this._dragDeg = 0;
+    this.setWheelAngle(0);
+    onSteerChange(0);
+  }
+
   bindButtons(onAction) {
     document.querySelectorAll("[data-slot]").forEach((el) => {
       const slotId = el.getAttribute("data-slot");

@@ -179,6 +179,10 @@ function enterWheelScreen() {
     socket.send({ type: "button", action, state });
   });
 
+  ui.bindWheelDrag((normalized) => {
+    latestSteer = normalized;
+  });
+
   motion.setMaxTilt(ui.sensitivity);
   motion.start((normalized) => {
     latestSteer = normalized;
@@ -220,6 +224,7 @@ function stopSteerLoop() {
 let calibrateFabTimer = null;
 $("calibrate-btn").addEventListener("click", () => {
   motion.calibrate();
+  ui.resetWheelDrag((normalized) => { latestSteer = normalized; });
   flashCalibrateFab();
 });
 document.addEventListener("touchstart", (evt) => {
