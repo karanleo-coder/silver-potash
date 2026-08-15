@@ -15,7 +15,6 @@ export class WheelSocket {
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
-      this._startPing();
       this.onOpen();
     };
 
@@ -43,6 +42,13 @@ export class WheelSocket {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(obj));
     }
+  }
+
+  // Callers must invoke this only after the join handshake completes (server "welcome") —
+  // the server requires the very first frame it receives to be the join message, so pinging
+  // can't start until after that.
+  startPing() {
+    this._startPing();
   }
 
   close() {

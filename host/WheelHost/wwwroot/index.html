@@ -17,12 +17,51 @@
 </head>
 <body>
 
+<button id="theme-toggle-btn" class="theme-toggle" aria-label="Switch theme">🌙</button>
+
 <!-- ===================== JOIN SCREEN ===================== -->
 <section id="join-screen" class="screen">
   <div class="join-card">
     <div class="brand">
-      <div class="brand-wheel-icon">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="8"/><circle cx="50" cy="50" r="10" fill="currentColor"/><line x1="50" y1="12" x2="50" y2="34" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><line x1="21" y1="66" x2="38" y2="54" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><line x1="79" y1="66" x2="62" y2="54" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>
+      <div class="hero-wheel">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="rimGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#4a5468"/>
+              <stop offset="0.5" stop-color="#23262f"/>
+              <stop offset="1" stop-color="#121319"/>
+            </linearGradient>
+            <linearGradient id="rimGloss" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity="0.4"/>
+              <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="hubGrad" cx="0.35" cy="0.3" r="0.8">
+              <stop offset="0" stop-color="#5b6478"/>
+              <stop offset="1" stop-color="#181a21"/>
+            </radialGradient>
+            <linearGradient id="spokeGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#3c4354"/>
+              <stop offset="1" stop-color="#181a21"/>
+            </linearGradient>
+          </defs>
+
+          <circle cx="100" cy="100" r="82" fill="none" stroke="url(#rimGrad)" stroke-width="18"/>
+          <circle cx="100" cy="100" r="82" fill="none" stroke="#e8896f" stroke-width="1.4" stroke-dasharray="2 5" opacity="0.5"/>
+          <circle cx="100" cy="100" r="82" fill="none" stroke="url(#rimGloss)" stroke-width="6"
+                  stroke-dasharray="130 400" transform="rotate(-45 100 100)"/>
+
+          <path d="M100,64 L100,32" stroke="url(#spokeGrad)" stroke-width="15" stroke-linecap="round"/>
+          <path d="M67,121 L38,151" stroke="url(#spokeGrad)" stroke-width="15" stroke-linecap="round"/>
+          <path d="M133,121 L162,151" stroke="url(#spokeGrad)" stroke-width="15" stroke-linecap="round"/>
+
+          <path d="M44,56 A82 82 0 0 1 64,38" stroke="#e8543f" stroke-width="10" stroke-linecap="round" fill="none"/>
+          <path d="M156,56 A82 82 0 0 0 136,38" stroke="#e8543f" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+          <circle cx="100" cy="100" r="35" fill="url(#hubGrad)" stroke="#0d0e12" stroke-width="2"/>
+          <circle cx="100" cy="100" r="35" fill="none" stroke="#ffffff" stroke-opacity="0.15"/>
+          <circle cx="100" cy="100" r="15" fill="#e8543f"/>
+          <path d="M89,100 L111,100 M100,89 L100,111" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+        </svg>
       </div>
       <h1>WheelHost</h1>
       <p class="subtitle">Enter the code shown on your PC to connect this device as a wheel</p>

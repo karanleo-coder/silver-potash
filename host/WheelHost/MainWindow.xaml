@@ -11,50 +11,55 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="WheelHost" FontSize="24" FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <Ellipse x:Name="ServerStatusDot" Style="{StaticResource StatusDot}" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="ServerStatusText" Text="Server stopped" Style="{StaticResource MutedText}"/>
+                        <Ellipse x:Name="ServerStatusDot" Style="{DynamicResource StatusDot}" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="ServerStatusText" Text="Server stopped" Style="{DynamicResource MutedText}"/>
                     </StackPanel>
                 </StackPanel>
-                <Button Grid.Column="1" x:Name="StartStopButton" Content="Start Server"
-                        Style="{StaticResource PrimaryButton}" Click="StartStopButton_Click"
+                <Button Grid.Column="1" x:Name="ThemeToggleButton" Content="☀️"
+                        Style="{DynamicResource SecondaryButton}" Click="ThemeToggle_Click"
+                        VerticalAlignment="Center" Margin="0,0,10,0" Padding="10,8"
+                        ToolTip="Switch between dark and light theme"/>
+                <Button Grid.Column="2" x:Name="StartStopButton" Content="Start Server"
+                        Style="{DynamicResource PrimaryButton}" Click="StartStopButton_Click"
                         VerticalAlignment="Center"/>
             </Grid>
 
             <!-- ===================== ViGEm warning ===================== -->
-            <Border x:Name="ViGemWarningBorder" Style="{StaticResource CardBorder}"
-                    BorderBrush="{StaticResource BadBrush}" Visibility="Collapsed">
+            <Border x:Name="ViGemWarningBorder" Style="{DynamicResource CardBorder}"
+                    BorderBrush="{DynamicResource BadBrush}" Visibility="Collapsed">
                 <StackPanel>
-                    <TextBlock Text="Virtual controller unavailable" FontWeight="SemiBold" Foreground="{StaticResource BadBrush}"/>
-                    <TextBlock x:Name="ViGemWarningText" TextWrapping="Wrap" Margin="0,6,0,10" Style="{StaticResource MutedText}"/>
+                    <TextBlock Text="Virtual controller unavailable" FontWeight="SemiBold" Foreground="{DynamicResource BadBrush}"/>
+                    <TextBlock x:Name="ViGemWarningText" TextWrapping="Wrap" Margin="0,6,0,10" Style="{DynamicResource MutedText}"/>
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Retry" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                        <Button Content="Retry" Style="{DynamicResource SecondaryButton}" Margin="0,0,10,0"
                                 Click="RetryVigem_Click"/>
-                        <Button Content="Download ViGEmBus driver" Style="{StaticResource SecondaryButton}"
+                        <Button Content="Download ViGEmBus driver" Style="{DynamicResource SecondaryButton}"
                                 Click="OpenVigemDownload_Click"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
             <!-- ===================== Connection card ===================== -->
-            <Border Style="{StaticResource CardBorder}">
+            <Border Style="{DynamicResource CardBorder}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Join Code" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Text="Join Code" Style="{DynamicResource SectionTitle}"/>
                         <TextBlock x:Name="JoinCodeText" Text="------" FontSize="34" FontWeight="Bold"
-                                   FontFamily="Consolas" Foreground="{StaticResource AccentBrush}"/>
-                        <TextBlock x:Name="LanAddressText" Text="Server not running" Style="{StaticResource MutedText}" Margin="0,8,0,14"/>
+                                   FontFamily="Consolas" Foreground="{DynamicResource AccentBrush}"/>
+                        <TextBlock x:Name="LanAddressText" Text="Server not running" Style="{DynamicResource MutedText}" Margin="0,8,0,14"/>
                         <StackPanel Orientation="Horizontal">
-                            <Button Content="New code" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                            <Button Content="New code" Style="{DynamicResource SecondaryButton}" Margin="0,0,10,0"
                                     Click="NewCode_Click"/>
-                            <Button Content="Copy join URL" Style="{StaticResource SecondaryButton}"
+                            <Button Content="Copy join URL" Style="{DynamicResource SecondaryButton}"
                                     Click="CopyUrl_Click"/>
                         </StackPanel>
                     </StackPanel>
@@ -66,53 +71,53 @@
             </Border>
 
             <!-- ===================== Device status card ===================== -->
-            <Border Style="{StaticResource CardBorder}">
+            <Border Style="{DynamicResource CardBorder}">
                 <StackPanel>
-                    <TextBlock Text="Device" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="Device" Style="{DynamicResource SectionTitle}"/>
                     <StackPanel Orientation="Horizontal">
-                        <Ellipse x:Name="DeviceStatusDot" Style="{StaticResource StatusDot}" Margin="0,0,8,0"/>
+                        <Ellipse x:Name="DeviceStatusDot" Style="{DynamicResource StatusDot}" Margin="0,0,8,0"/>
                         <TextBlock x:Name="DeviceStatusText" Text="No device connected"/>
                     </StackPanel>
-                    <TextBlock x:Name="DeviceLastSeenText" Style="{StaticResource MutedText}" Margin="0,6,0,14"/>
+                    <TextBlock x:Name="DeviceLastSeenText" Style="{DynamicResource MutedText}" Margin="0,6,0,14"/>
                     <Button x:Name="DisconnectDeviceButton" Content="Disconnect device"
-                            Style="{StaticResource SecondaryButton}" HorizontalAlignment="Left"
+                            Style="{DynamicResource SecondaryButton}" HorizontalAlignment="Left"
                             Click="DisconnectDevice_Click" IsEnabled="False"/>
                 </StackPanel>
             </Border>
 
             <!-- ===================== Live input preview ===================== -->
-            <Border Style="{StaticResource CardBorder}">
+            <Border Style="{DynamicResource CardBorder}">
                 <StackPanel>
-                    <TextBlock Text="Live Input" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="Live Input" Style="{DynamicResource SectionTitle}"/>
 
-                    <TextBlock Text="Steering" Style="{StaticResource MutedText}" Margin="0,0,0,6"/>
-                    <Border Height="14" CornerRadius="7" Background="{StaticResource Panel2Brush}"
-                            BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1">
+                    <TextBlock Text="Steering" Style="{DynamicResource MutedText}" Margin="0,0,0,6"/>
+                    <Border Height="14" CornerRadius="7" Background="{DynamicResource Panel2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush2}" BorderThickness="1">
                         <Grid x:Name="SteeringTrack">
-                            <Border Width="2" Background="{StaticResource BorderBrush2}" HorizontalAlignment="Center"/>
-                            <Ellipse x:Name="SteeringThumb" Width="18" Height="18" Fill="{StaticResource AccentBrush}"
+                            <Border Width="2" Background="{DynamicResource BorderBrush2}" HorizontalAlignment="Center"/>
+                            <Ellipse x:Name="SteeringThumb" Width="18" Height="18" Fill="{DynamicResource AccentBrush}"
                                      HorizontalAlignment="Left" Margin="0,-2,0,0"/>
                         </Grid>
                     </Border>
 
-                    <TextBlock Text="Buttons" Style="{StaticResource MutedText}" Margin="0,18,0,6"/>
+                    <TextBlock Text="Buttons" Style="{DynamicResource MutedText}" Margin="0,18,0,6"/>
                     <UniformGrid Columns="4" Rows="2">
-                        <Border x:Name="Chip_Accelerate" Style="{StaticResource InputChip}"><TextBlock Text="Accel" Style="{StaticResource ChipText}"/></Border>
-                        <Border x:Name="Chip_Brake" Style="{StaticResource InputChip}"><TextBlock Text="Brake" Style="{StaticResource ChipText}"/></Border>
-                        <Border x:Name="Chip_GearUp" Style="{StaticResource InputChip}"><TextBlock Text="Gear+" Style="{StaticResource ChipText}"/></Border>
-                        <Border x:Name="Chip_GearDown" Style="{StaticResource InputChip}"><TextBlock Text="Gear-" Style="{StaticResource ChipText}"/></Border>
-                        <Border x:Name="Chip_Handbrake" Style="{StaticResource InputChip}"><TextBlock Text="H-Brake" Style="{StaticResource ChipText}"/></Border>
-                        <Border x:Name="Chip_Extra1" Style="{StaticResource InputChip}"><TextBlock Text="Extra 1" Style="{StaticResource ChipText}"/></Border>
-                        <Border x:Name="Chip_Extra2" Style="{StaticResource InputChip}"><TextBlock Text="Extra 2" Style="{StaticResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Accelerate" Style="{DynamicResource InputChip}"><TextBlock Text="Accel" Style="{DynamicResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Brake" Style="{DynamicResource InputChip}"><TextBlock Text="Brake" Style="{DynamicResource ChipText}"/></Border>
+                        <Border x:Name="Chip_GearUp" Style="{DynamicResource InputChip}"><TextBlock Text="Gear+" Style="{DynamicResource ChipText}"/></Border>
+                        <Border x:Name="Chip_GearDown" Style="{DynamicResource InputChip}"><TextBlock Text="Gear-" Style="{DynamicResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Handbrake" Style="{DynamicResource InputChip}"><TextBlock Text="H-Brake" Style="{DynamicResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Extra1" Style="{DynamicResource InputChip}"><TextBlock Text="Extra 1" Style="{DynamicResource ChipText}"/></Border>
+                        <Border x:Name="Chip_Extra2" Style="{DynamicResource InputChip}"><TextBlock Text="Extra 2" Style="{DynamicResource ChipText}"/></Border>
                     </UniformGrid>
                 </StackPanel>
             </Border>
 
             <!-- ===================== Mapping editor ===================== -->
-            <Border Style="{StaticResource CardBorder}">
+            <Border Style="{DynamicResource CardBorder}">
                 <StackPanel>
-                    <TextBlock Text="Button Mapping" Style="{StaticResource SectionTitle}"/>
-                    <TextBlock Text="Choose which Xbox controller element each logical action drives." Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,14"/>
+                    <TextBlock Text="Button Mapping" Style="{DynamicResource SectionTitle}"/>
+                    <TextBlock Text="Choose which Xbox controller element each logical action drives." Style="{DynamicResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,14"/>
 
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/></Grid.ColumnDefinitions>
@@ -151,9 +156,9 @@
                     </Grid>
 
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Save mapping" Style="{StaticResource PrimaryButton}" Margin="0,0,10,0"
+                        <Button Content="Save mapping" Style="{DynamicResource PrimaryButton}" Margin="0,0,10,0"
                                 Click="SaveMapping_Click"/>
-                        <Button Content="Reset to defaults" Style="{StaticResource SecondaryButton}"
+                        <Button Content="Reset to defaults" Style="{DynamicResource SecondaryButton}"
                                 Click="ResetMapping_Click"/>
                     </StackPanel>
                 </StackPanel>

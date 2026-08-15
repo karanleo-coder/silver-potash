@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using WheelHost.Services;
 
 namespace WheelHost;
 
@@ -24,7 +25,11 @@ public partial class App : Application
 
         try
         {
-            var window = new MainWindow();
+            var settingsStore = new SettingsStore();
+            var settings = settingsStore.Load();
+            ApplyTheme(settings.Theme);
+
+            var window = new MainWindow(settings, settingsStore);
             MainWindow = window;
             window.Show();
         }
@@ -33,6 +38,13 @@ public partial class App : Application
             ReportCrash(ex, "OnStartup");
             Shutdown(1);
         }
+    }
+
+    /// <summary>Swaps the single theme ResourceDictionary merged in App.xaml (always index 0).</summary>
+    public void ApplyTheme(string theme)
+    {
+        var uri = theme == "light" ? "Themes/LightTheme.xaml" : "Themes/DarkTheme.xaml";
+        Resources.MergedDictionaries[0] = new ResourceDictionary { Source = new Uri(uri, UriKind.Relative) };
     }
 
     private static void ReportCrash(Exception? ex, string source)

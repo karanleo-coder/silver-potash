@@ -1,8 +1,12 @@
 import { WheelSocket } from "./ws.js";
 import { MotionInput } from "./motion.js";
 import { WheelUI } from "./wheel-ui.js";
+import { initTheme } from "./theme.js";
+import { haptics } from "./haptics.js";
 
 const $ = (id) => document.getElementById(id);
+
+initTheme($("theme-toggle-btn"));
 
 const joinScreen = $("join-screen");
 const motionGate = $("motion-gate");
@@ -135,9 +139,12 @@ joinForm.addEventListener("submit", (evt) => {
 async function handleHostMessage(msg) {
   if (msg.type === "welcome") {
     setConnecting(false);
+    socket.startPing();
+    haptics.joined();
     await proceedToWheel();
   } else if (msg.type === "error") {
     setConnecting(false);
+    haptics.error();
     joinStatus.textContent = msg.message || "Could not join.";
     setCodeValue("");
     codeBoxes[0].focus();
@@ -168,6 +175,7 @@ $("enable-motion-btn").addEventListener("click", async () => {
 function enterWheelScreen() {
   ui.renderLabels();
   ui.bindButtons((action, state) => {
+    if (state === "down") haptics.tap();
     socket.send({ type: "button", action, state });
   });
 

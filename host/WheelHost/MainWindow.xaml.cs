@@ -9,7 +9,7 @@ namespace WheelHost;
 
 public partial class MainWindow : Window
 {
-    private readonly SettingsStore _settingsStore = new();
+    private readonly SettingsStore _settingsStore;
     private readonly AppSettings _settings;
     private readonly VirtualControllerService _controller = new();
 
@@ -23,10 +23,12 @@ public partial class MainWindow : Window
 
     private static readonly Xbox360Element[] AllElements = Enum.GetValues<Xbox360Element>();
 
-    public MainWindow()
+    public MainWindow(AppSettings settings, SettingsStore settingsStore)
     {
         InitializeComponent();
-        _settings = _settingsStore.Load();
+        _settings = settings;
+        _settingsStore = settingsStore;
+        ThemeToggleButton.Content = _settings.Theme == "light" ? "🌙" : "☀️";
 
         MapCombo(ButtonAction.Accelerate, Combo_Accelerate);
         MapCombo(ButtonAction.Brake, Combo_Brake);
@@ -47,6 +49,14 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
         SteeringTrack.SizeChanged += (_, _) => UpdateSteeringThumb(0);
+    }
+
+    private void ThemeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.Theme = _settings.Theme == "light" ? "dark" : "light";
+        ((App)Application.Current).ApplyTheme(_settings.Theme);
+        ThemeToggleButton.Content = _settings.Theme == "light" ? "🌙" : "☀️";
+        _settingsStore.Save(_settings);
     }
 
     private void MapCombo(ButtonAction action, ComboBox combo)
