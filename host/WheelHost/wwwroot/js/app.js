@@ -163,16 +163,26 @@ async function proceedToWheel() {
 
 $("enable-motion-btn").addEventListener("click", async () => {
   const granted = await MotionInput.requestPermission();
+  enterWheelScreen(granted);
   if (!granted) {
-    joinStatus.textContent = "Motion permission is required to use the wheel.";
-    showOnly(joinScreen);
-    socket.close();
-    return;
+    // iOS only shows its permission dialog once per site — after a denial, no page can
+    // re-trigger it; only Settings can undo it. Tilt just won't move the wheel until then,
+    // but dragging the wheel graphic directly always works, so still let them drive.
+    flashTiltUnavailable();
   }
-  enterWheelScreen();
 });
 
-function enterWheelScreen() {
+function flashTiltUnavailable() {
+  const original = connLabel.textContent;
+  connLabel.textContent = "Tilt unavailable — drag the wheel to steer";
+  setTimeout(() => {
+    if (connLabel.textContent === "Tilt unavailable — drag the wheel to steer") {
+      connLabel.textContent = original;
+    }
+  }, 4000);
+}
+
+function enterWheelScreen(enableTilt = true) {
   ui.renderLabels();
   ui.bindButtons((action, state) => {
     if (state === "down") haptics.tap();
@@ -183,11 +193,16 @@ function enterWheelScreen() {
     latestSteer = normalized;
   });
 
-  motion.setMaxTilt(ui.sensitivity);
-  motion.start((normalized) => {
-    latestSteer = normalized;
-    ui.setWheelAngle(normalized);
-  });
+  // Tilt is an enhancement, not a requirement — dragging the wheel graphic needs no
+  // permission at all, so a denied/unavailable/skipped motion permission should never block
+  // driving. Only wire up the sensor listener when it's actually usable.
+  if (enableTilt) {
+    motion.setMaxTilt(ui.sensitivity);
+    motion.start((normalized) => {
+      latestSteer = normalized;
+      ui.setWheelAngle(normalized);
+    });
+  }
 
   wheelScreenActive = true;
   window.addEventListener("resize", applyOrientationGate);
