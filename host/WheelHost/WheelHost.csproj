@@ -10,7 +10,6 @@
     <RootNamespace>WheelHost</RootNamespace>
     <AssemblyName>WheelHost</AssemblyName>
     <ApplicationIcon>wwwroot/assets/icon.ico</ApplicationIcon>
-    <InvariantGlobalization>true</InvariantGlobalization>
     <Version>1.0.0</Version>
     <Product>WheelHost</Product>
     <Authors>WheelHost</Authors>
