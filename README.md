@@ -157,9 +157,10 @@ Pushing a `v*.*.*` tag triggers `.github/workflows/release.yml`, which:
 4. Publishes a GitHub Release for the tag with that installer attached.
 
 To test the installer build locally on Windows without pushing a tag: install Inno Setup, run
-`dotnet publish host/WheelHost/WheelHost.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish`,
+`dotnet publish host/WheelHost/WheelHost.csproj -c Release -r win-x64 --self-contained true -o publish`,
 then `ISCC installer\WheelHost.iss` (the ViGEmBus-bundling step is skipped automatically if
-`installer/redist/ViGEmBusSetup_x64.exe` isn't present).
+`installer/redist/ViGEmBusSetup_x64.exe` isn't present). Deliberately not `-p:PublishSingleFile=true`
+here — see the comment in `.github/workflows/release.yml`, it crashes WPF's resource loading.
 
 ### Project layout
 
