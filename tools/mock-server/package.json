@@ -1,0 +1,12 @@
+{
+  "name": "wheelhost-mock-server",
+  "private": true,
+  "type": "module",
+  "description": "Local dev/test stand-in for WheelHost's GameServer — serves the phone/tablet web client and speaks the same join/motion/button WebSocket protocol, so the client can be tested on a Mac before building the real Windows host. Does not drive a real virtual controller.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

@@ -137,6 +137,23 @@ installed manually (the installer normally does this for you — see below).
 No admin elevation is needed to run WheelHost itself; the app talks raw TCP sockets rather
 than `HttpListener`, specifically so it never needs to run as Administrator.
 
+### Testing the phone/tablet client without a Windows machine
+
+`tools/mock-server/` is a small Node.js stand-in for WheelHost's `GameServer` — it serves
+`wwwroot` and speaks the same join/motion/button/ping WebSocket protocol, so you can test the
+web client from a Mac/Linux box on your LAN. It does **not** drive a real virtual controller
+(ViGEm is Windows-only); steering and button events are just printed live to the console so
+you can confirm the client is sending sane values.
+
+```bash
+cd tools/mock-server
+npm install
+npm start
+```
+
+It prints a join code and a LAN URL — open that on your phone/tablet the same way you would
+with the real host.
+
 ### Releasing a new version
 
 The installer is built entirely by CI — you never need Inno Setup or Windows locally to cut a

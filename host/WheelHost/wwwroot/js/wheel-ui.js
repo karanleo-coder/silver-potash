@@ -2,7 +2,9 @@
 // localStorage-backed persistence for mapping + sensitivity.
 
 const STORAGE_KEY = "wheelControllerSettings.v1";
-const MAX_VISUAL_ANGLE_DEG = 90;
+// Lock-to-lock range for both the visual wheel rotation and the drag gesture — 180 each way
+// (360 total) reads as an actual wheel spin rather than a small quarter-turn nudge.
+const MAX_VISUAL_ANGLE_DEG = 180;
 
 export const SLOTS = [
   { id: "gearDown", name: "Left Paddle" },
@@ -92,8 +94,7 @@ export class WheelUI {
     if (!wrap) return;
 
     let dragging = false;
-    let startAngle = 0;
-    let startDeg = this._dragDeg ?? 0;
+    let lastAngle = 0;
 
     const angleAt = (evt) => {
       const rect = wrap.getBoundingClientRect();
@@ -105,14 +106,22 @@ export class WheelUI {
     wrap.addEventListener("pointerdown", (evt) => {
       dragging = true;
       wrap.setPointerCapture(evt.pointerId);
-      startAngle = angleAt(evt);
-      startDeg = this._dragDeg ?? 0;
+      lastAngle = angleAt(evt);
     });
 
     wrap.addEventListener("pointermove", (evt) => {
       if (!dragging) return;
-      const delta = angleAt(evt) - startAngle;
-      const deg = Math.max(-MAX_VISUAL_ANGLE_DEG, Math.min(MAX_VISUAL_ANGLE_DEG, startDeg + delta));
+      const angle = angleAt(evt);
+      // Per-frame delta, unwrapped across atan2's ±180° discontinuity (due-left of center) —
+      // tracking cumulative rotation via a single delta from the drag's start angle instead
+      // would jump wildly the moment a finger crosses that boundary, which the wider lock-to-
+      // lock range here makes easy to do accidentally.
+      let step = angle - lastAngle;
+      if (step > 180) step -= 360;
+      else if (step < -180) step += 360;
+      lastAngle = angle;
+
+      const deg = Math.max(-MAX_VISUAL_ANGLE_DEG, Math.min(MAX_VISUAL_ANGLE_DEG, (this._dragDeg ?? 0) + step));
       this._dragDeg = deg;
       const normalized = deg / MAX_VISUAL_ANGLE_DEG;
       this.setWheelAngle(normalized);
