@@ -5,14 +5,14 @@
 //   -> response curve -> time-based smoothing -> optional invert
 //
 // DeviceOrientation's beta/gamma are reported relative to the device's own physical (portrait)
-// frame, not the screen's current visual orientation. Rather than hand-picking one raw axis per
-// landscape rotation (easy to get an asymmetric sign wrong for one of the two rotations, which
-// is exactly what produces "steers correctly in one physical orientation, backwards in the
-// other"), this rotates the (gamma, beta) tilt vector by -screen.orientation.angle — the same
-// transform the standard "screen-adjusted orientation" compensation from the W3C
-// DeviceOrientation spec examples (and libraries built on it, e.g. gyronorm.js) use, specialized
-// to the four 90-degree-step cases so it stays exact (no floating-point cos/sin residue mixing
-// the two axes together). See _compensatedRoll below for the derivation.
+// frame, not the screen's current visual orientation, and which one tracks "left-right roll"
+// depends on both the current screen rotation *and* how upright the device is held (see
+// _compensatedRoll's comment — this is held upright in landscape, like a wheel, not flat).
+// screen.orientation.angle picks the right raw axis for the current rotation and signs it so
+// both landscape rotations agree with each other, instead of the two rotations needing
+// independently-guessed signs (which is how a device can end up steering correctly held one way
+// and backwards held the other way — the two guesses just don't have to agree with each other
+// unless the code forces them to).
 //
 // The sensor callback only ever *records* the latest raw angles — all the shaping (compensation,
 // dead zone, curve, smoothing) runs in a requestAnimationFrame loop instead, decoupled from
@@ -87,14 +87,18 @@ export class MotionInput {
     this._rawGamma = event.gamma ?? 0;
   }
 
-  // Rotates the device's own (gamma, beta) tilt vector into the current screen's frame by
-  // -angle, so "roll" always means the same physical motion (tilting the visible left edge
-  // down = negative) no matter which way the device is physically rotated. Derivation: gamma is
-  // the device's natural left-right tilt, beta its natural front-back tilt; treating those as a
-  // 2D vector (gamma, beta) and rotating it clockwise by `angle` degrees (the same rotation
-  // screen.orientation.angle says content was rotated, to stay upright) gives, at the four
-  // 90-degree steps: 0 -> gamma, 90 -> beta, 180 -> -gamma, 270 -> -beta. Written out exactly
-  // instead of via Math.cos/sin so 90/270 don't leak a tiny fraction of the other axis in.
+  // Picks whichever raw axis currently reads the device's left-right roll and signs it so both
+  // landscape rotations agree with each other, using screen.orientation.angle.
+  //
+  // beta/gamma's textbook roles ("beta = front-back, gamma = left-right") only hold near the
+  // spec's flat-on-a-table reference pose. This app holds the device roughly *upright*, in
+  // landscape, like an actual wheel — a very different attitude — and at that attitude the two
+  // axes swap which physical motion they respond to (a well-known quirk of DeviceOrientation's
+  // Euler angles: they're only decoupled like their names suggest near beta=gamma=0). Confirmed
+  // on real hardware: held upright in landscape, gamma tracks left-right roll and beta tracks
+  // forward/backward nod — the opposite of the flat-pose assumption an earlier version of this
+  // code made, which is why tilting the device forward/back was steering it instead of rolling
+  // it left-right doing nothing.
   _compensatedRoll() {
     const angle = (screen.orientation && typeof screen.orientation.angle === "number")
       ? screen.orientation.angle
@@ -102,10 +106,10 @@ export class MotionInput {
     const normalized = ((angle % 360) + 360) % 360;
 
     switch (normalized) {
-      case 90: return this._rawBeta;
-      case 180: return -this._rawGamma;
-      case 270: return -this._rawBeta;
-      default: return this._rawGamma; // 0 — portrait fallback, shouldn't normally happen
+      case 90: return this._rawGamma;
+      case 180: return -this._rawBeta;
+      case 270: return -this._rawGamma;
+      default: return this._rawBeta; // 0 — portrait fallback, shouldn't normally happen
     }
   }
 
