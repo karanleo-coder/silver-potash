@@ -1,28 +1,35 @@
 // Reads device tilt and turns it into a normalized steering value in [-1, 1], using the same
 // pipeline mobile racing games (Real Racing, Asphalt, CSR, ...) use for tilt controls:
 //
-//   raw sensor angle -> center offset -> dead zone -> response curve -> time-based smoothing
+//   raw sensor angles -> screen-orientation compensation -> center offset -> dead zone
+//   -> response curve -> time-based smoothing -> optional invert
 //
-// DeviceOrientation's beta/gamma are reported relative to the device's own portrait frame,
-// not the screen's current orientation. When the tablet is held in landscape "like a wheel",
-// the rolling motion the user feels shows up on a different raw axis depending on which way
-// landscape is rotated, so we read screen.orientation.angle to pick the right one and sign it
-// consistently.
+// DeviceOrientation's beta/gamma are reported relative to the device's own physical (portrait)
+// frame, not the screen's current visual orientation. Rather than hand-picking one raw axis per
+// landscape rotation (easy to get an asymmetric sign wrong for one of the two rotations, which
+// is exactly what produces "steers correctly in one physical orientation, backwards in the
+// other"), this rotates the (gamma, beta) tilt vector by -screen.orientation.angle — the same
+// transform the standard "screen-adjusted orientation" compensation from the W3C
+// DeviceOrientation spec examples (and libraries built on it, e.g. gyronorm.js) use, specialized
+// to the four 90-degree-step cases so it stays exact (no floating-point cos/sin residue mixing
+// the two axes together). See _compensatedRoll below for the derivation.
 //
-// The sensor callback only ever *records* the latest raw angle — all the shaping (dead zone,
-// curve, smoothing) runs in a requestAnimationFrame loop instead, decoupled from however often
-// deviceorientation actually fires (it varies a lot: ~60Hz on some devices, ~15-20Hz on
-// others). That keeps the steering feel — and the smoothing time-constant specifically —
-// identical across devices, the same way a game's update loop is decoupled from its input
-// polling.
+// The sensor callback only ever *records* the latest raw angles — all the shaping (compensation,
+// dead zone, curve, smoothing) runs in a requestAnimationFrame loop instead, decoupled from
+// however often deviceorientation actually fires (it varies a lot: ~60Hz on some devices,
+// ~15-20Hz on others). That keeps the steering feel — and the smoothing time-constant
+// specifically — identical across devices, the same way a game's update loop is decoupled from
+// its input polling.
 export class MotionInput {
   constructor() {
     this.maxTiltDeg = 35;
     this.deadZoneDeg = 2.5; // ignore micro-jitter right around dead-ahead
     this.curve = 1.6; // >1 = gentler near center, full lock still reachable at max tilt
     this.smoothingTauSec = 0.06; // exponential smoothing time-constant, frame-rate independent
+    this.invert = false; // safety-net user preference — see _compensatedRoll's derivation note
 
-    this._raw = 0;
+    this._rawBeta = 0;
+    this._rawGamma = 0;
     this._smoothed = 0;
     this._offset = 0;
     this._callback = null;
@@ -64,36 +71,49 @@ export class MotionInput {
   }
 
   calibrate() {
-    this._offset = this._raw;
+    this._offset = this._compensatedRoll();
   }
 
   setMaxTilt(deg) {
     this.maxTiltDeg = Math.max(5, deg);
   }
 
+  setInvert(invert) {
+    this.invert = !!invert;
+  }
+
   _handler(event) {
+    this._rawBeta = event.beta ?? 0;
+    this._rawGamma = event.gamma ?? 0;
+  }
+
+  // Rotates the device's own (gamma, beta) tilt vector into the current screen's frame by
+  // -angle, so "roll" always means the same physical motion (tilting the visible left edge
+  // down = negative) no matter which way the device is physically rotated. Derivation: gamma is
+  // the device's natural left-right tilt, beta its natural front-back tilt; treating those as a
+  // 2D vector (gamma, beta) and rotating it clockwise by `angle` degrees (the same rotation
+  // screen.orientation.angle says content was rotated, to stay upright) gives, at the four
+  // 90-degree steps: 0 -> gamma, 90 -> beta, 180 -> -gamma, 270 -> -beta. Written out exactly
+  // instead of via Math.cos/sin so 90/270 don't leak a tiny fraction of the other axis in.
+  _compensatedRoll() {
     const angle = (screen.orientation && typeof screen.orientation.angle === "number")
       ? screen.orientation.angle
       : (window.orientation || 0);
+    const normalized = ((angle % 360) + 360) % 360;
 
-    let roll;
-    if (angle === 90) {
-      roll = -(event.beta ?? 0);
-    } else if (angle === -90 || angle === 270) {
-      roll = (event.beta ?? 0);
-    } else {
-      // Portrait fallback (shouldn't normally happen — wheel screen requires landscape).
-      roll = (event.gamma ?? 0);
+    switch (normalized) {
+      case 90: return this._rawBeta;
+      case 180: return -this._rawGamma;
+      case 270: return -this._rawBeta;
+      default: return this._rawGamma; // 0 — portrait fallback, shouldn't normally happen
     }
-
-    this._raw = roll;
   }
 
   _tick(nowMs) {
     const dt = Math.min(0.05, Math.max(0, (nowMs - this._lastTickMs) / 1000));
     this._lastTickMs = nowMs;
 
-    const centered = this._raw - this._offset;
+    const centered = this._compensatedRoll() - this._offset;
 
     // Dead zone: shave the first couple of degrees off both sides so hand tremor and sensor
     // noise near dead-ahead don't creep into the steering, then rescale the remaining travel
@@ -115,7 +135,7 @@ export class MotionInput {
     const alpha = 1 - Math.exp(-dt / this.smoothingTauSec);
     this._smoothed += (curved - this._smoothed) * alpha;
 
-    if (this._callback) this._callback(this._smoothed);
+    if (this._callback) this._callback(this.invert ? -this._smoothed : this._smoothed);
     this._rafId = requestAnimationFrame(this._tick);
   }
 }

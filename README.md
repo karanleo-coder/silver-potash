@@ -77,8 +77,10 @@ Private networks** (this is what lets your phone/tablet reach it over Wi-Fi).
 5. Hold the device landscape, like a wheel. Tilt to steer; tap the paddles/pedals/handbrake
    for the rest. Tap **Calibrate center** (or 3-finger-tap anywhere) to re-zero if "straight
    ahead" drifts.
-6. Tap the gear icon to remap any on-screen control to a different action, or adjust steering
-   sensitivity. Your layout is saved on the device for next time.
+6. Tap the gear icon to remap any on-screen control, adjust steering sensitivity (also governs
+   how far a drag on the wheel graphic goes before hitting full lock, not just tilt), or flip
+   **Invert steering** if left/right ever comes out backwards. Your layout is saved on the
+   device for next time.
 
 In WheelHost, the **Button Mapping** panel lets you change which Xbox controller
 button/trigger each logical action (Accelerate, Brake, Gear Up/Down, Handbrake, Extra 1/2)
@@ -97,7 +99,8 @@ connecting a second device while one is active will be rejected until the first 
    **Live Input** steering bar sits centered with no chips lit.
 2. From a phone/tablet on the same Wi-Fi, scan the QR / enter the code, grant motion
    permission, and confirm the on-screen wheel visually rotates the same direction you
-   physically tilt the device. If it's inverted, that's worth flagging — see the note below.
+   physically tilt the device. If it's backwards, flip **Invert steering** in the gear-icon
+   settings panel — see the note below.
 3. Watch WheelHost's **Live Input** panel while tapping each on-screen button — the matching
    chip (Accel/Brake/Gear+/Gear-/H-Brake/Extra 1/Extra 2) should light up on press and clear
    on release, and the steering bar should track tilt smoothly.
@@ -118,10 +121,13 @@ I built and wired this up without a Windows machine or the physical devices on h
 spots are worth double-checking the first time you run it — nothing structural, just exactly
 the kind of thing that only shows up on real hardware/SDKs:
 
-- **Tilt direction** (`wwwroot/js/motion.js`): the sign of the steering value is derived from
-  `screen.orientation.angle` to handle both landscape rotations consistently. If steering
-  comes out inverted on your device, flip the sign in `_handler()`'s `angle === 90` /
-  `angle === -90` branches.
+- **Tilt direction** (`wwwroot/js/motion.js`): the compensated-roll value is derived from
+  `screen.orientation.angle` by rotating the device's own (gamma, beta) tilt vector into the
+  screen's current frame — the same landscape rotation both directions get treated as exact
+  mirror images of each other, instead of two independently hand-picked signs, which is what let
+  the old code be right in one physical landscape rotation and backwards in the other. If it's
+  still backwards on a given device, no code edit is needed — toggle **Invert steering** in the
+  wheel screen's settings panel (persisted per-device via `localStorage`).
 - **ViGEm API surface** (`Services/VirtualControllerService.cs`): written against the
   `Nefarius.ViGEm.Client` API as documented (`Xbox360Button`/`Xbox360Axis`/`Xbox360Slider`
   static members, `CreateXbox360Controller()`, `VigemBusNotFoundException`). If `dotnet build`

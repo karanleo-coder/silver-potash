@@ -242,6 +242,7 @@ function enterWheelScreen(enableTilt = true) {
   // driving. Only wire up the sensor listener when it's actually usable.
   if (enableTilt) {
     motion.setMaxTilt(ui.sensitivity);
+    motion.setInvert(ui.invert);
     motion.start((normalized) => {
       latestSteer = normalized;
       ui.setWheelAngle(normalized);
@@ -328,6 +329,13 @@ sensitivitySlider.addEventListener("input", () => {
   sensitivityValue.textContent = String(deg);
   ui.setSensitivity(deg);
   motion.setMaxTilt(deg);
+});
+
+const invertToggle = $("invert-toggle");
+invertToggle.checked = ui.invert;
+invertToggle.addEventListener("change", () => {
+  ui.setInvert(invertToggle.checked);
+  motion.setInvert(invertToggle.checked);
 });
 
 $("disconnect-btn").addEventListener("click", () => {

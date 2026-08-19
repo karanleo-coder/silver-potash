@@ -2,8 +2,10 @@
 // localStorage-backed persistence for mapping + sensitivity.
 
 const STORAGE_KEY = "wheelControllerSettings.v1";
-// Lock-to-lock range for both the visual wheel rotation and the drag gesture — 180 each way
-// (360 total) reads as an actual wheel spin rather than a small quarter-turn nudge.
+// Visual lock-to-lock range for the wheel graphic (180 each way, 360 total, reads as an actual
+// wheel spin) and the ceiling on how far a drag gesture can wind up. How many of those degrees
+// of *drag* it actually takes to reach full analog lock is governed separately by `sensitivity`
+// (same setting tilt uses) — see bindWheelDrag.
 const MAX_VISUAL_ANGLE_DEG = 180;
 
 export const SLOTS = [
@@ -37,6 +39,7 @@ export class WheelUI {
   constructor() {
     this.mapping = { ...DEFAULT_MAPPING };
     this.sensitivity = DEFAULT_SENSITIVITY;
+    this.invert = false;
     this._load();
     this._wheelSvg = document.getElementById("wheel-svg");
   }
@@ -48,6 +51,7 @@ export class WheelUI {
       const parsed = JSON.parse(raw);
       if (parsed.mapping) this.mapping = { ...DEFAULT_MAPPING, ...parsed.mapping };
       if (typeof parsed.sensitivity === "number") this.sensitivity = parsed.sensitivity;
+      if (typeof parsed.invert === "boolean") this.invert = parsed.invert;
     } catch {
       // corrupted/old data — fall back to defaults
     }
@@ -56,7 +60,7 @@ export class WheelUI {
   _save() {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ mapping: this.mapping, sensitivity: this.sensitivity })
+      JSON.stringify({ mapping: this.mapping, sensitivity: this.sensitivity, invert: this.invert })
     );
   }
 
@@ -68,6 +72,11 @@ export class WheelUI {
 
   setSensitivity(deg) {
     this.sensitivity = deg;
+    this._save();
+  }
+
+  setInvert(invert) {
+    this.invert = !!invert;
     this._save();
   }
 
@@ -123,7 +132,13 @@ export class WheelUI {
 
       const deg = Math.max(-MAX_VISUAL_ANGLE_DEG, Math.min(MAX_VISUAL_ANGLE_DEG, (this._dragDeg ?? 0) + step));
       this._dragDeg = deg;
-      const normalized = deg / MAX_VISUAL_ANGLE_DEG;
+
+      // Same "degrees of rotation = full analog lock" sensitivity setting used for tilt applies
+      // here too, so the slider actually does something regardless of which input method is
+      // active — previously drag ignored it entirely and always needed the full 180° sweep.
+      const lockDeg = Math.max(5, this.sensitivity);
+      const raw = Math.max(-1, Math.min(1, deg / lockDeg));
+      const normalized = this.invert ? -raw : raw;
       this.setWheelAngle(normalized);
       onSteerChange(normalized);
     });
