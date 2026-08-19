@@ -8,3 +8,4 @@ tools/mock-server/node_modules/
 tools/mock-server/package-lock.json
 tools/mock-server/certs/
 host/WheelHost/certs/
+log.txt

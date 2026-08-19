@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Threading;
 using WheelHost.Models;
 using WheelHost.Services;
 
@@ -22,6 +23,12 @@ public partial class MainWindow : Window
     private GameServer? _server;
     private bool _serverRunning;
     private bool _isPopulatingCombos;
+
+    private const int TraceCapacity = 64;
+    private readonly List<double> _traceHistory = new(TraceCapacity);
+    private readonly HashSet<ButtonAction> _pressedInputActions = new();
+    private readonly DispatcherTimer _sessionTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private DateTime _deviceConnectedAtUtc;
 
     private static readonly Xbox360Element[] AllElements = Enum.GetValues<Xbox360Element>();
 
@@ -51,6 +58,8 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
         SteeringTrack.SizeChanged += (_, _) => UpdateSteeringThumb(0);
+        TraceCanvas.SizeChanged += (_, _) => RedrawTrace();
+        _sessionTimer.Tick += SessionTimer_Tick;
     }
 
     private void ThemeToggle_Click(object sender, RoutedEventArgs e)
@@ -228,6 +237,11 @@ public partial class MainWindow : Window
             DeviceStatusDot.Fill = (Brush)FindResource("GoodBrush");
             DeviceLastSeenText.Text = $"Connected at {DateTime.Now:T}";
             DisconnectDeviceButton.IsEnabled = true;
+
+            Stat_Device.Text = name;
+            _deviceConnectedAtUtc = DateTime.UtcNow;
+            Stat_Session.Text = "00:00";
+            _sessionTimer.Start();
         });
     }
 
@@ -243,13 +257,51 @@ public partial class MainWindow : Window
         });
     }
 
+    private void SessionTimer_Tick(object? sender, EventArgs e)
+    {
+        var elapsed = DateTime.UtcNow - _deviceConnectedAtUtc;
+        Stat_Session.Text = elapsed.ToString(@"mm\:ss");
+    }
+
     private void OnSteeringChanged(double value)
     {
         Dispatcher.Invoke(() =>
         {
             UpdateSteeringThumb(value);
             PreviewWheelRotate.Angle = value * 90;
+
+            var deg = (int)Math.Round(value * 90);
+            Stat_Steering.Text = (deg > 0 ? "+" : "") + deg + "°";
+
+            if (_traceHistory.Count == TraceCapacity) _traceHistory.RemoveAt(0);
+            _traceHistory.Add(value);
+            RedrawTrace();
         });
+    }
+
+    private void RedrawTrace()
+    {
+        var width = TraceCanvas.ActualWidth;
+        var height = TraceCanvas.ActualHeight;
+        if (width <= 0 || height <= 0 || _traceHistory.Count == 0)
+        {
+            TracePolyline.Points = new PointCollection();
+            return;
+        }
+
+        var midY = height / 2;
+        var amplitude = midY - 4;
+        var step = TraceCapacity > 1 ? width / (TraceCapacity - 1) : 0;
+        var startIndex = TraceCapacity - _traceHistory.Count;
+
+        var points = new PointCollection(_traceHistory.Count);
+        for (var i = 0; i < _traceHistory.Count; i++)
+        {
+            var x = (startIndex + i) * step;
+            var y = midY - _traceHistory[i] * amplitude;
+            points.Add(new Point(x, y));
+        }
+        TracePolyline.Points = points;
     }
 
     private void OnButtonChanged(ButtonAction action, bool pressed)
@@ -261,7 +313,27 @@ public partial class MainWindow : Window
 
             if (action == ButtonAction.Accelerate) SetAcceleratePreview(pressed);
             else if (action == ButtonAction.Brake) SetBrakePreview(pressed);
+
+            if (action is ButtonAction.Accelerate or ButtonAction.Brake or ButtonAction.Handbrake)
+            {
+                if (pressed) _pressedInputActions.Add(action);
+                else _pressedInputActions.Remove(action);
+                UpdateInputStat();
+            }
         });
+    }
+
+    private void UpdateInputStat()
+    {
+        string label;
+        string brushKey;
+        if (_pressedInputActions.Contains(ButtonAction.Brake)) { label = "Brake"; brushKey = "BadBrush"; }
+        else if (_pressedInputActions.Contains(ButtonAction.Handbrake)) { label = "Handbrake"; brushKey = "BadBrush"; }
+        else if (_pressedInputActions.Contains(ButtonAction.Accelerate)) { label = "Accel"; brushKey = "AccentBrush"; }
+        else { label = "Coast"; brushKey = "MutedBrush"; }
+
+        Stat_Input.Text = label;
+        Stat_Input.Foreground = (Brush)FindResource(brushKey);
     }
 
     private void SetAcceleratePreview(bool active)
@@ -323,6 +395,15 @@ public partial class MainWindow : Window
         SetBrakePreview(false);
         foreach (var chip in _chips.Values)
             chip.Background = (Brush)FindResource("Panel2Brush");
+
+        _sessionTimer.Stop();
+        _pressedInputActions.Clear();
+        _traceHistory.Clear();
+        Stat_Steering.Text = "0°";
+        Stat_Session.Text = "--:--";
+        Stat_Device.Text = "None";
+        UpdateInputStat();
+        RedrawTrace();
     }
 
     // ---------------------------------------------------------------- mapping editor
