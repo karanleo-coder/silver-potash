@@ -5,16 +5,17 @@
          light palette. Keep both files' resource keys in sync when editing either. -->
 
     <!-- ===================== Brushes ===================== -->
-    <SolidColorBrush x:Key="BgBrush" Color="#F3F4F8"/>
+    <!-- Apex Link Controller palette (light) -->
+    <SolidColorBrush x:Key="BgBrush" Color="#F2F2F3"/>
     <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="Panel2Brush" Color="#EDEFF4"/>
-    <SolidColorBrush x:Key="BorderBrush2" Color="#D9DCE6"/>
-    <SolidColorBrush x:Key="TextBrush" Color="#14161C"/>
-    <SolidColorBrush x:Key="MutedBrush" Color="#5C6270"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="#E8543F"/>
-    <SolidColorBrush x:Key="Accent2Brush" Color="#FF7A5C"/>
+    <SolidColorBrush x:Key="Panel2Brush" Color="#E9E9EA"/>
+    <SolidColorBrush x:Key="BorderBrush2" Color="#C9CCD3"/>
+    <SolidColorBrush x:Key="TextBrush" Color="#1D1F20"/>
+    <SolidColorBrush x:Key="MutedBrush" Color="#7A7A7D"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#5980A6"/>
+    <SolidColorBrush x:Key="Accent2Brush" Color="#2C455D"/>
     <SolidColorBrush x:Key="GoodBrush" Color="#1E9F63"/>
-    <SolidColorBrush x:Key="BadBrush" Color="#E23E40"/>
+    <SolidColorBrush x:Key="BadBrush" Color="#A6595E"/>
 
     <!-- ===================== Base styles ===================== -->
     <Style TargetType="Window">
@@ -43,7 +44,7 @@
         <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="CornerRadius" Value="0"/>
         <Setter Property="Padding" Value="20"/>
         <Setter Property="Margin" Value="0,0,0,16"/>
     </Style>
@@ -59,7 +60,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="0" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
@@ -88,7 +89,7 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            CornerRadius="0" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
@@ -148,7 +149,7 @@
         <Setter Property="Background" Value="{StaticResource Panel2Brush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="CornerRadius" Value="0"/>
         <Setter Property="Margin" Value="0,0,8,8"/>
         <Setter Property="Padding" Value="0,10"/>
     </Style>

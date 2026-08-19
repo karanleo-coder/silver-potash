@@ -2,16 +2,17 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ===================== Brushes ===================== -->
-    <SolidColorBrush x:Key="BgBrush" Color="#0A0C11"/>
-    <SolidColorBrush x:Key="PanelBrush" Color="#151823"/>
-    <SolidColorBrush x:Key="Panel2Brush" Color="#1C202E"/>
-    <SolidColorBrush x:Key="BorderBrush2" Color="#2A2F40"/>
-    <SolidColorBrush x:Key="TextBrush" Color="#EEF0F5"/>
-    <SolidColorBrush x:Key="MutedBrush" Color="#8890A3"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="#E8543F"/>
-    <SolidColorBrush x:Key="Accent2Brush" Color="#FF7A5C"/>
-    <SolidColorBrush x:Key="GoodBrush" Color="#35D07F"/>
-    <SolidColorBrush x:Key="BadBrush" Color="#FF4D4F"/>
+    <!-- Apex Link Controller palette (dark) -->
+    <SolidColorBrush x:Key="BgBrush" Color="#12171C"/>
+    <SolidColorBrush x:Key="PanelBrush" Color="#1B232B"/>
+    <SolidColorBrush x:Key="Panel2Brush" Color="#171D24"/>
+    <SolidColorBrush x:Key="BorderBrush2" Color="#2E3947"/>
+    <SolidColorBrush x:Key="TextBrush" Color="#E6EBEF"/>
+    <SolidColorBrush x:Key="MutedBrush" Color="#8B98A4"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#94BCE3"/>
+    <SolidColorBrush x:Key="Accent2Brush" Color="#B5D9FD"/>
+    <SolidColorBrush x:Key="GoodBrush" Color="#7FD9A8"/>
+    <SolidColorBrush x:Key="BadBrush" Color="#E08A90"/>
 
     <!-- ===================== Base styles ===================== -->
     <Style TargetType="Window">
@@ -40,7 +41,7 @@
         <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="CornerRadius" Value="0"/>
         <Setter Property="Padding" Value="20"/>
         <Setter Property="Margin" Value="0,0,0,16"/>
     </Style>
@@ -56,7 +57,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="0" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
@@ -85,7 +86,7 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            CornerRadius="0" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
@@ -149,7 +150,7 @@
         <Setter Property="Background" Value="{StaticResource Panel2Brush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="CornerRadius" Value="0"/>
         <Setter Property="Margin" Value="0,0,8,8"/>
         <Setter Property="Padding" Value="0,10"/>
     </Style>

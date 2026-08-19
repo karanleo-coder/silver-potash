@@ -1,8 +1,11 @@
 using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Security.Authentication;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using WheelHost.Models;
@@ -10,13 +13,18 @@ using WheelHost.Models;
 namespace WheelHost.Services;
 
 /// <summary>
-/// A tiny hand-rolled HTTP + WebSocket server over a raw <see cref="TcpListener"/>.
+/// A tiny hand-rolled HTTPS + WebSocket (wss) server over a raw <see cref="TcpListener"/>.
 ///
 /// Deliberately avoids <see cref="System.Net.HttpListener"/>: binding http.sys to a
 /// LAN-visible (non-localhost) prefix normally requires either running elevated or a one-time
 /// "netsh http add urlacl" reservation. A plain TCP socket has no such restriction, so this
 /// keeps WheelHost a normal, non-admin desktop app. WebSocket framing itself is still handled
 /// by the BCL via <see cref="WebSocket.CreateFromStream"/> once the handshake is done by hand.
+///
+/// Every connection is wrapped in TLS via <see cref="SslStream"/> using a self-signed
+/// certificate from <see cref="CertificateService"/> — see that class for why plain HTTP
+/// can't be used at all (mobile browsers refuse to fire tilt/motion sensor events on a
+/// non-secure origin).
 /// </summary>
 public class GameServer : IDisposable
 {
@@ -36,6 +44,7 @@ public class GameServer : IDisposable
 
     private readonly VirtualControllerService _controller;
     private readonly string _wwwrootPath;
+    private readonly X509Certificate2 _certificate;
 
     private TcpListener? _listener;
     private CancellationTokenSource? _cts;
@@ -62,6 +71,7 @@ public class GameServer : IDisposable
     {
         _controller = controller;
         _wwwrootPath = wwwrootPath;
+        _certificate = CertificateService.GetOrCreate();
     }
 
     public void Start(int port)
@@ -140,7 +150,27 @@ public class GameServer : IDisposable
         using (client)
         {
             client.NoDelay = true;
-            var stream = client.GetStream();
+
+            await using var sslStream = new SslStream(client.GetStream(), leaveInnerStreamOpen: false);
+            try
+            {
+                await sslStream.AuthenticateAsServerAsync(
+                    new SslServerAuthenticationOptions
+                    {
+                        ServerCertificate = _certificate,
+                        ClientCertificateRequired = false,
+                        EnabledSslProtocols = SslProtocols.None, // let the OS negotiate the best mutually supported version
+                    },
+                    ct);
+            }
+            catch
+            {
+                // TLS handshake failed — e.g. a stray plain-HTTP probe hitting the port. Nothing
+                // useful to do but drop the connection.
+                return;
+            }
+
+            Stream stream = sslStream;
 
             string headerBlock;
             try
@@ -185,7 +215,7 @@ public class GameServer : IDisposable
 
     // ---------------------------------------------------------------- HTTP parsing / static files
 
-    private static async Task<string> ReadHttpHeaderBlockAsync(NetworkStream stream, CancellationToken ct)
+    private static async Task<string> ReadHttpHeaderBlockAsync(Stream stream, CancellationToken ct)
     {
         var buffer = new List<byte>(512);
         var tail = new byte[4];
@@ -224,7 +254,7 @@ public class GameServer : IDisposable
         return (method, path, headers);
     }
 
-    private async Task ServeStaticFileAsync(NetworkStream stream, string rawPath)
+    private async Task ServeStaticFileAsync(Stream stream, string rawPath)
     {
         var path = Uri.UnescapeDataString(rawPath.Split('?')[0]);
         if (path == "/") path = "/index.html";
@@ -250,7 +280,7 @@ public class GameServer : IDisposable
         await WriteSimpleResponseAsync(stream, 200, contentType, bytes);
     }
 
-    private static async Task WriteSimpleResponseAsync(NetworkStream stream, int statusCode, string contentType, byte[] body)
+    private static async Task WriteSimpleResponseAsync(Stream stream, int statusCode, string contentType, byte[] body)
     {
         var statusText = statusCode switch
         {
@@ -271,7 +301,7 @@ public class GameServer : IDisposable
         await stream.FlushAsync();
     }
 
-    private static async Task CompleteWebSocketHandshakeAsync(NetworkStream stream, string secWebSocketKey)
+    private static async Task CompleteWebSocketHandshakeAsync(Stream stream, string secWebSocketKey)
     {
         const string magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         var accept = Convert.ToBase64String(SHA1.HashData(Encoding.ASCII.GetBytes(secWebSocketKey + magic)));

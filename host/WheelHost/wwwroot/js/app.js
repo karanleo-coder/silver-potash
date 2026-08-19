@@ -25,6 +25,9 @@ const connDot = $("conn-dot");
 const connLabel = $("conn-label");
 const pingLabel = $("ping-label");
 
+const gyroBtn = $("gyro-btn");
+const gyroDesc = $("gyro-desc");
+
 const socket = new WheelSocket();
 const motion = new MotionInput();
 const ui = new WheelUI();
@@ -32,6 +35,39 @@ const ui = new WheelUI();
 let steerLoopHandle = null;
 let latestSteer = 0;
 let wheelScreenActive = false;
+
+// --- gyroscope permission: explicit, user-initiated, requested from the join screen ---
+// "granted" / "denied" / "unnecessary" (no permission prompt exists on this browser) /
+// "unknown" (needs a prompt but the driver hasn't tapped the button yet).
+let gyroState = "unknown";
+
+function setGyroBtn(state, label) {
+  gyroState = state;
+  gyroBtn.classList.remove("granted", "denied", "unnecessary");
+  if (state !== "unknown") gyroBtn.classList.add(state);
+  gyroBtn.textContent = label;
+  gyroBtn.disabled = state === "granted" || state === "unnecessary";
+}
+
+if (!MotionInput.needsExplicitPermission) {
+  gyroDesc.textContent = "This browser doesn't need a permission prompt — tilt steering is ready to go.";
+  setGyroBtn("unnecessary", "Ready");
+} else {
+  gyroBtn.addEventListener("click", async () => {
+    gyroBtn.disabled = true;
+    gyroBtn.textContent = "Asking…";
+    const granted = await MotionInput.requestPermission();
+    if (granted) {
+      gyroDesc.textContent = "Tilt sensor access granted — you're clear to race.";
+      setGyroBtn("granted", "Enabled");
+      haptics.tap();
+    } else {
+      gyroDesc.textContent = "Permission denied — no worries, you can still drag the on-screen wheel to steer.";
+      setGyroBtn("denied", "Denied");
+      haptics.error();
+    }
+  });
+}
 
 function showOnly(el) {
   [joinScreen, motionGate, rotateGate, wheelScreen].forEach((s) => s.classList.add("hidden"));
@@ -154,7 +190,15 @@ async function handleHostMessage(msg) {
 
 // --- motion permission + wheel screen ---
 async function proceedToWheel() {
-  if (MotionInput.needsExplicitPermission) {
+  if (gyroState === "granted" || gyroState === "unnecessary") {
+    // Already resolved on the join screen — no need to prompt again.
+    enterWheelScreen(gyroState === "granted" || !MotionInput.needsExplicitPermission);
+  } else if (gyroState === "denied") {
+    // iOS only shows the permission dialog once per site; a second prompt is impossible,
+    // so go straight in and just fall back to drag-to-steer.
+    enterWheelScreen(false);
+    flashTiltUnavailable();
+  } else if (MotionInput.needsExplicitPermission) {
     showOnly(motionGate);
   } else {
     enterWheelScreen();
@@ -295,4 +339,3 @@ $("disconnect-btn").addEventListener("click", () => {
   showOnly(joinScreen);
   joinStatus.textContent = "";
 });
-

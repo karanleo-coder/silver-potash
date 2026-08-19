@@ -13,7 +13,7 @@
 #endif
 
 #define MyAppName "WheelHost"
-#define MyAppPublisher "WheelHost"
+#define MyAppPublisher "Vertex"
 #define MyAppExeName "WheelHost.exe"
 #define MyAppURL "https://github.com/ViGEm/ViGEmBus"
 

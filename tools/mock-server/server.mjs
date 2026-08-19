@@ -4,15 +4,23 @@
 // but does NOT drive a real virtual Xbox controller (ViGEm is Windows-only). Steering and
 // button events are just printed live to the console so you can confirm the client is
 // actually sending sane values.
-import http from "node:http";
+//
+// Served over HTTPS (self-signed cert) rather than plain HTTP: modern mobile browsers
+// (iOS Safari, Chrome) silently refuse to fire deviceorientation/devicemotion events on a
+// non-secure origin at all — no error, the permission prompt can even say "granted" and
+// still nothing happens. A LAN IP like http://192.168.x.x is never "secure" by browser
+// rules (only https: or localhost qualify), so gyro steering cannot work without this.
+import https from "node:https";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer } from "ws";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const wwwroot = path.resolve(__dirname, "../../host/WheelHost/wwwroot");
+const certDir = path.join(__dirname, "certs");
 const PORT = Number(process.argv[2]) || 7890;
 
 const CONTENT_TYPES = {
@@ -45,10 +53,84 @@ function steerBar(value) {
   return "[" + "-".repeat(pos) + "●" + "-".repeat(width - 1 - pos) + "]";
 }
 
+// --- self-signed TLS cert, regenerated whenever the LAN IP or expiry changes ---
+function ensureCert(lanIp) {
+  const keyPath = path.join(certDir, "key.pem");
+  const certPath = path.join(certDir, "cert.pem");
+  const metaPath = path.join(certDir, "meta.json");
+  const wantedSans = ["localhost", "127.0.0.1", ...(lanIp ? [lanIp] : [])];
+
+  let needsRegen = true;
+  if (fs.existsSync(keyPath) && fs.existsSync(certPath) && fs.existsSync(metaPath)) {
+    try {
+      const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+      const sameSans = JSON.stringify(meta.sans) === JSON.stringify(wantedSans);
+      const stillValid = new Date(meta.notAfter) > new Date();
+      needsRegen = !sameSans || !stillValid;
+    } catch {
+      needsRegen = true;
+    }
+  }
+
+  if (needsRegen) {
+    fs.mkdirSync(certDir, { recursive: true });
+    const altNames = wantedSans
+      .map((san, i) => {
+        const isIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(san);
+        return `${isIp ? "IP" : "DNS"}.${i + 1} = ${san}`;
+      })
+      .join("\n");
+
+    const configPath = path.join(certDir, "openssl.cnf");
+    fs.writeFileSync(
+      configPath,
+      [
+        "[req]",
+        "distinguished_name = dn",
+        "x509_extensions = v3_req",
+        "prompt = no",
+        "[dn]",
+        "CN = WheelHost Local Test Server",
+        "[v3_req]",
+        "subjectAltName = @alt_names",
+        "[alt_names]",
+        altNames,
+        "",
+      ].join("\n")
+    );
+
+    execFileSync(
+      "openssl",
+      [
+        "req", "-x509", "-nodes",
+        "-newkey", "rsa:2048",
+        "-keyout", keyPath,
+        "-out", certPath,
+        "-days", "825",
+        "-config", configPath,
+      ],
+      { stdio: "ignore" }
+    );
+
+    fs.writeFileSync(
+      metaPath,
+      JSON.stringify({
+        sans: wantedSans,
+        notAfter: new Date(Date.now() + 820 * 24 * 3600 * 1000).toISOString(),
+      })
+    );
+    console.log(`Generated a new self-signed TLS certificate for: ${wantedSans.join(", ")}`);
+  }
+
+  return { key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) };
+}
+
 const joinCode = generateJoinCode();
 let activeSocket = null;
+const lanIp = getLanIPv4();
+const tls = ensureCert(lanIp);
 
-const server = http.createServer((req, res) => {
+const server = https.createServer(tls, (req, res) => {
   let urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
   if (urlPath === "/") urlPath = "/index.html";
   if (urlPath.includes("..")) {
@@ -135,12 +217,18 @@ wss.on("connection", (ws) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  const ip = getLanIPv4();
-  console.log("WheelHost mock test server — client/UI testing only, no virtual controller");
-  console.log("--------------------------------------------------------------------------");
+  console.log("WheelHost mock test server (HTTPS) — client/UI testing only, no virtual controller");
+  console.log("--------------------------------------------------------------------------------");
   console.log(`Join code: ${joinCode}`);
-  console.log(ip
-    ? `On your iPad (same Wi-Fi as this Mac): http://${ip}:${PORT}/?code=${joinCode}`
+  console.log(`On this Mac: https://localhost:${PORT}/?code=${joinCode}`);
+  console.log(lanIp
+    ? `On your iPad/phone (same Wi-Fi as this Mac): https://${lanIp}:${PORT}/?code=${joinCode}`
     : "Could not detect a LAN IPv4 address — check your Wi-Fi connection.");
-  console.log("--------------------------------------------------------------------------\n");
+  console.log("--------------------------------------------------------------------------------");
+  console.log("The cert is self-signed, so the browser will show a privacy warning the first");
+  console.log("time each device visits — this is expected for a LAN-only app with no public");
+  console.log("domain. On iOS Safari: tap 'Show Details' -> 'visit this website' -> 'Visit");
+  console.log("Website'. On Chrome/Android: tap 'Advanced' -> 'Proceed'. Needed once per device");
+  console.log("(until the cert is regenerated, e.g. if your LAN IP changes).");
+  console.log("--------------------------------------------------------------------------------\n");
 });

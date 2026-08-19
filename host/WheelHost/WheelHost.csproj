@@ -12,7 +12,8 @@
     <ApplicationIcon>wwwroot/assets/icon.ico</ApplicationIcon>
     <Version>1.0.0</Version>
     <Product>WheelHost</Product>
-    <Authors>WheelHost</Authors>
+    <Authors>Vertex</Authors>
+    <Company>Vertex</Company>
   </PropertyGroup>
 
   <ItemGroup>

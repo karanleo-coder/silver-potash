@@ -48,6 +48,7 @@ second join attempt is politely rejected until the first disconnects.
 > *(replace `<your-username>/<your-repo>` once this is pushed to your own GitHub repo — see
 > [Releasing a new version](#releasing-a-new-version) below)*
 
+
 Run the installer, click through the wizard, done. It installs WheelHost to your Start Menu,
 adds an uninstaller, and — if it's not already on your system — silently installs the
 [ViGEmBus](https://github.com/ViGEm/ViGEmBus) driver that lets Windows see the virtual
@@ -59,12 +60,20 @@ Private networks** (this is what lets your phone/tablet reach it over Wi-Fi).
 ## Using it
 
 1. Launch WheelHost, click **Start Server**. It shows a 6-digit join code, a QR code, and the
-   LAN address it's listening on (e.g. `http://192.168.1.23:7890`).
+   LAN address it's listening on (e.g. `https://192.168.1.23:7890`).
 2. On your iPad/phone, make sure it's on **the same Wi-Fi network** as the PC (not a guest
    network, not cellular data).
 3. Scan the QR code with your camera (it opens straight to the join screen with the code
-   filled in), or open the address manually and type the code into the 6-digit entry.
-4. Tap **Enable Motion & Start**, grant the sensor permission prompt.
+   filled in), or open the address manually and type the code into the 6-digit entry. The
+   first time a given device connects, its browser will show a **"connection is not
+   private"** warning — expected, since it's a self-signed certificate (there's no public
+   domain for a LAN-only app). Tap through it (iOS Safari: "Show Details" → "visit this
+   website"; Chrome/Android: "Advanced" → "Proceed") — it won't ask again on that device
+   unless the certificate is later regenerated (e.g. the PC's LAN IP changes).
+4. On the join screen, tap **Enable** in the "Gyro steering" callout to grant tilt-sensor
+   permission up front, then enter the code and connect. (HTTPS is required for this to work
+   at all — mobile browsers silently refuse to fire motion-sensor events on plain `http://`,
+   which is exactly why the server uses a certificate instead.)
 5. Hold the device landscape, like a wheel. Tilt to steer; tap the paddles/pedals/handbrake
    for the rest. Tap **Calibrate center** (or 3-finger-tap anywhere) to re-zero if "straight
    ahead" drifts.
@@ -144,6 +153,11 @@ than `HttpListener`, specifically so it never needs to run as Administrator.
 web client from a Mac/Linux box on your LAN. It does **not** drive a real virtual controller
 (ViGEm is Windows-only); steering and button events are just printed live to the console so
 you can confirm the client is sending sane values.
+
+Like the real host, it serves over **HTTPS** with a self-signed certificate (auto-generated
+into `tools/mock-server/certs/`, gitignored) — required for `deviceorientation` to fire on a
+phone browser at all. Expect a one-time "not private" warning on each test device; tap through
+it (see the [Using it](#using-it) note above).
 
 ```bash
 cd tools/mock-server

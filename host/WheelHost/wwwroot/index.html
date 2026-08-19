@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="WheelHost" />
-<meta name="theme-color" content="#0a0c11" />
+<meta name="theme-color" content="#0a0b0f" />
 <title>WheelHost Controller</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
@@ -65,6 +65,15 @@
       </div>
       <h1>WheelHost</h1>
       <p class="subtitle">Enter the code shown on your PC to connect this device as a wheel</p>
+    </div>
+
+    <div class="gyro-callout">
+      <div class="gyro-icon" aria-hidden="true">&#127765;</div>
+      <div class="gyro-copy">
+        <span class="gyro-title">Gyro steering</span>
+        <span id="gyro-desc" class="gyro-desc">Grant tilt-sensor access now — one tap, nothing pops up mid-race.</span>
+      </div>
+      <button id="gyro-btn" type="button" class="gyro-btn">Enable</button>
     </div>
 
     <form id="join-form" autocomplete="off">
@@ -136,14 +145,23 @@
       <svg id="wheel-svg" viewBox="0 0 200 200" class="wheel-graphic">
         <circle cx="100" cy="100" r="86" fill="none" stroke="#2a2f3a" stroke-width="14"/>
         <circle cx="100" cy="100" r="86" fill="none" stroke="url(#rim)" stroke-width="14"/>
-        <circle cx="100" cy="100" r="22" fill="#151821" stroke="#3a4150" stroke-width="3"/>
-        <line x1="100" y1="26" x2="100" y2="76" stroke="#e8543f" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="100" cy="100" r="86" fill="none" stroke="#ffc300" stroke-width="1.2" stroke-dasharray="2 6" opacity="0.5"/>
+        <circle cx="100" cy="100" r="22" fill="#151821" stroke="url(#hubRim)" stroke-width="3"/>
+        <line x1="100" y1="26" x2="100" y2="76" stroke="url(#accentBar)" stroke-width="12" stroke-linecap="round"/>
         <line x1="34" y1="140" x2="70" y2="116" stroke="#4a5468" stroke-width="12" stroke-linecap="round"/>
         <line x1="166" y1="140" x2="130" y2="116" stroke="#4a5468" stroke-width="12" stroke-linecap="round"/>
         <defs>
           <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#3d4557"/>
             <stop offset="1" stop-color="#20242e"/>
+          </linearGradient>
+          <linearGradient id="accentBar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffc300"/>
+            <stop offset="1" stop-color="#ff3b30"/>
+          </linearGradient>
+          <linearGradient id="hubRim" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffc300"/>
+            <stop offset="1" stop-color="#ff3b30"/>
           </linearGradient>
         </defs>
       </svg>

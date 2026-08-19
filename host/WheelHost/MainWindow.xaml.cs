@@ -196,8 +196,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        var url = $"http://{ip}:{_server.Port}/?code={_server.JoinCode}";
-        LanAddressText.Text = $"http://{ip}:{_server.Port}";
+        var url = $"https://{ip}:{_server.Port}/?code={_server.JoinCode}";
+        LanAddressText.Text = $"https://{ip}:{_server.Port}";
         QrImage.Source = QrCodeService.GeneratePng(url);
     }
 
@@ -213,7 +213,7 @@ public partial class MainWindow : Window
         if (_server == null) return;
         var ip = NetworkHelper.GetPrimaryLanIPv4();
         if (ip == null) return;
-        Clipboard.SetText($"http://{ip}:{_server.Port}/?code={_server.JoinCode}");
+        Clipboard.SetText($"https://{ip}:{_server.Port}/?code={_server.JoinCode}");
     }
 
     private void DisconnectDevice_Click(object sender, RoutedEventArgs e) => _server?.DisconnectActiveDevice();

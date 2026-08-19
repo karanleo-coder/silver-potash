@@ -12,7 +12,7 @@ function currentTheme() {
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", theme === "light" ? "#f3f4f8" : "#0a0c11");
+  if (meta) meta.setAttribute("content", theme === "light" ? "#f2f3f8" : "#0a0b0f");
 }
 
 export function initTheme(toggleBtn) {

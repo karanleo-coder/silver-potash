@@ -1,7 +1,7 @@
 <Window x:Class="WheelHost.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WheelHost" Height="840" Width="540" MinWidth="480" MinHeight="640"
+        Title="ApexLink" Height="840" Width="540" MinWidth="480" MinHeight="640"
         WindowStartupLocation="CenterScreen">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
         <StackPanel>
@@ -14,7 +14,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="WheelHost" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
+                    <TextBlock Text="APEXLINK" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Ellipse x:Name="ServerStatusDot" Style="{DynamicResource StatusDot}" Margin="0,0,6,0"/>
                         <TextBlock x:Name="ServerStatusText" Text="Server stopped" Style="{DynamicResource MutedText}"/>
@@ -52,7 +52,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Join Code" Style="{DynamicResource SectionTitle}"/>
+                        <TextBlock Text="JOIN CODE" Style="{DynamicResource SectionTitle}"/>
                         <TextBlock x:Name="JoinCodeText" Text="------" FontSize="34" FontWeight="Bold"
                                    FontFamily="Consolas" Foreground="{DynamicResource AccentBrush}"/>
                         <TextBlock x:Name="LanAddressText" Text="Server not running" Style="{DynamicResource MutedText}" Margin="0,8,0,14"/>
@@ -63,7 +63,8 @@
                                     Click="CopyUrl_Click"/>
                         </StackPanel>
                     </StackPanel>
-                    <Border Grid.Column="1" Width="150" Height="150" Background="White" CornerRadius="10"
+                    <Border Grid.Column="1" Width="150" Height="150" Background="White" CornerRadius="0"
+                            BorderBrush="{DynamicResource BorderBrush2}" BorderThickness="1"
                             VerticalAlignment="Top">
                         <Image x:Name="QrImage" Margin="8"/>
                     </Border>
@@ -73,7 +74,7 @@
             <!-- ===================== Device status card ===================== -->
             <Border Style="{DynamicResource CardBorder}">
                 <StackPanel>
-                    <TextBlock Text="Device" Style="{DynamicResource SectionTitle}"/>
+                    <TextBlock Text="DEVICE" Style="{DynamicResource SectionTitle}"/>
                     <StackPanel Orientation="Horizontal">
                         <Ellipse x:Name="DeviceStatusDot" Style="{DynamicResource StatusDot}" Margin="0,0,8,0"/>
                         <TextBlock x:Name="DeviceStatusText" Text="No device connected" Foreground="{DynamicResource TextBrush}"/>
@@ -88,9 +89,9 @@
             <!-- ===================== Live input preview ===================== -->
             <Border Style="{DynamicResource CardBorder}">
                 <StackPanel>
-                    <TextBlock Text="Live Input" Style="{DynamicResource SectionTitle}"/>
+                    <TextBlock Text="LIVE INPUT" Style="{DynamicResource SectionTitle}"/>
 
-                    <TextBlock Text="Steering" Style="{DynamicResource MutedText}" Margin="0,0,0,6"/>
+                    <TextBlock Text="STEERING" Style="{DynamicResource MutedText}" Margin="0,0,0,6"/>
                     <Border Height="14" CornerRadius="7" Background="{DynamicResource Panel2Brush}"
                             BorderBrush="{DynamicResource BorderBrush2}" BorderThickness="1">
                         <Grid x:Name="SteeringTrack">
@@ -100,7 +101,7 @@
                         </Grid>
                     </Border>
 
-                    <TextBlock Text="Buttons" Style="{DynamicResource MutedText}" Margin="0,18,0,6"/>
+                    <TextBlock Text="BUTTONS" Style="{DynamicResource MutedText}" Margin="0,18,0,6"/>
                     <UniformGrid Columns="4" Rows="2">
                         <Border x:Name="Chip_Accelerate" Style="{DynamicResource InputChip}"><TextBlock Text="Accel" Style="{DynamicResource ChipText}"/></Border>
                         <Border x:Name="Chip_Brake" Style="{DynamicResource InputChip}"><TextBlock Text="Brake" Style="{DynamicResource ChipText}"/></Border>
@@ -111,7 +112,7 @@
                         <Border x:Name="Chip_Extra2" Style="{DynamicResource InputChip}"><TextBlock Text="Extra 2" Style="{DynamicResource ChipText}"/></Border>
                     </UniformGrid>
 
-                    <TextBlock Text="Preview" Style="{DynamicResource MutedText}" Margin="0,18,0,6"/>
+                    <TextBlock Text="PREVIEW" Style="{DynamicResource MutedText}" Margin="0,18,0,6"/>
                     <Grid Height="110">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -177,7 +178,7 @@
             <!-- ===================== Mapping editor ===================== -->
             <Border Style="{DynamicResource CardBorder}">
                 <StackPanel>
-                    <TextBlock Text="Button Mapping" Style="{DynamicResource SectionTitle}"/>
+                    <TextBlock Text="BUTTON MAPPING" Style="{DynamicResource SectionTitle}"/>
                     <TextBlock Text="Choose which Xbox controller element each logical action drives." Style="{DynamicResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,14"/>
 
                     <Grid Margin="0,0,0,8">
