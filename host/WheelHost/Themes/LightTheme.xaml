@@ -18,11 +18,8 @@
     <SolidColorBrush x:Key="BadBrush" Color="#A6595E"/>
 
     <!-- ===================== Base styles ===================== -->
-    <Style TargetType="Window">
-        <Setter Property="Background" Value="{StaticResource BgBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="FontFamily" Value="Segoe UI"/>
-    </Style>
+    <!-- No implicit Window style here on purpose — see the note in DarkTheme.xaml; the window
+         sets its own Background/Foreground via DynamicResource in MainWindow.xaml. -->
 
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>

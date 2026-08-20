@@ -290,10 +290,15 @@ public class GameServer : IDisposable
             405 => "Method Not Allowed",
             _ => "Error",
         };
+        // no-cache forces the phone to revalidate every asset against this server instead of
+        // trusting a heuristic-cached copy — without it, a device that ever cached a stale or
+        // truncated stylesheet keeps rendering the wheel UI broken/unstyled until its cache
+        // happens to expire, including across app updates that changed wwwroot.
         var header =
             $"HTTP/1.1 {statusCode} {statusText}\r\n" +
             $"Content-Type: {contentType}\r\n" +
             $"Content-Length: {body.Length}\r\n" +
+            "Cache-Control: no-cache\r\n" +
             "Connection: close\r\n\r\n";
 
         await stream.WriteAsync(Encoding.ASCII.GetBytes(header));

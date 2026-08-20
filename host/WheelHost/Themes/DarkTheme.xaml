@@ -15,11 +15,11 @@
     <SolidColorBrush x:Key="BadBrush" Color="#E08A90"/>
 
     <!-- ===================== Base styles ===================== -->
-    <Style TargetType="Window">
-        <Setter Property="Background" Value="{StaticResource BgBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="FontFamily" Value="Segoe UI"/>
-    </Style>
+    <!-- No implicit Window style here on purpose: implicit styles only match the exact type,
+         and the app's window is the derived type MainWindow, so a TargetType="Window" style
+         silently never applies — which is how the window background stayed default-white under
+         the dark palette (near-white text on a white window). MainWindow.xaml sets its own
+         Background/Foreground via DynamicResource instead. -->
 
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>

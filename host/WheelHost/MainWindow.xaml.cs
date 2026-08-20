@@ -27,6 +27,7 @@ public partial class MainWindow : Window
     private const int TraceCapacity = 64;
     private readonly List<double> _traceHistory = new(TraceCapacity);
     private readonly HashSet<ButtonAction> _pressedInputActions = new();
+    private readonly HashSet<ButtonAction> _pressedChips = new();
     private readonly DispatcherTimer _sessionTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private DateTime _deviceConnectedAtUtc;
 
@@ -68,6 +69,22 @@ public partial class MainWindow : Window
         ((App)Application.Current).ApplyTheme(_settings.Theme);
         ThemeToggleButton.Content = _settings.Theme == "light" ? "🌙" : "☀️";
         _settingsStore.Save(_settings);
+        RefreshThemedVisuals();
+    }
+
+    /// <summary>
+    /// Re-resolves every brush that code-behind assigned via FindResource. Unlike the
+    /// DynamicResource references in XAML, those assignments are plain values — swapping the
+    /// theme dictionary doesn't retarget them, so without this the status dots, lit chips,
+    /// and Input stat would keep the previous theme's colors until their next event fired.
+    /// </summary>
+    private void RefreshThemedVisuals()
+    {
+        UpdateStartStopUi();
+        DeviceStatusDot.Fill = (Brush)FindResource(DisconnectDeviceButton.IsEnabled ? "GoodBrush" : "BadBrush");
+        foreach (var (action, chip) in _chips)
+            chip.Background = (Brush)FindResource(_pressedChips.Contains(action) ? "AccentBrush" : "Panel2Brush");
+        UpdateInputStat();
     }
 
     private void MapCombo(ButtonAction action, ComboBox combo)
@@ -308,6 +325,8 @@ public partial class MainWindow : Window
     {
         Dispatcher.Invoke(() =>
         {
+            if (pressed) _pressedChips.Add(action);
+            else _pressedChips.Remove(action);
             if (_chips.TryGetValue(action, out var chip))
                 chip.Background = (Brush)FindResource(pressed ? "AccentBrush" : "Panel2Brush");
 
@@ -398,6 +417,7 @@ public partial class MainWindow : Window
 
         _sessionTimer.Stop();
         _pressedInputActions.Clear();
+        _pressedChips.Clear();
         _traceHistory.Clear();
         Stat_Steering.Text = "0°";
         Stat_Session.Text = "--:--";

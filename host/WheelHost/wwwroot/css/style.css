@@ -29,7 +29,22 @@
   color-scheme: light;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+/* No text on this page is meant to be selectable — it's a game controller, not a document.
+   iOS Safari ignores the unprefixed property and needs -webkit-user-select, plus
+   -webkit-touch-callout to also suppress the long-press magnifier/callout — without both,
+   holding a pedal/paddle for a few seconds starts selecting its label instead of staying
+   pressed. Text entry fields opt back in below. */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+input[type="text"], input:not([type]), input[type="number"], textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
 
 html, body {
   height: 100%;
@@ -436,6 +451,11 @@ body {
 }
 .paddle-left { left: 4%; }
 .paddle-right { right: 4%; }
+
+/* The label rides inside the button but must never be the touch target itself — with
+   pointer events passing through it, a press-and-hold always lands on (and stays on) the
+   button element, so nothing beneath the finger is selectable or long-pressable. */
+.paddle-label { pointer-events: none; }
 
 .face-btn {
   position: absolute;

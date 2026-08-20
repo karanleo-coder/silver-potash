@@ -311,6 +311,47 @@ socket.onLatency = (ms) => {
   connDot.classList.toggle("bad", ms > 250);
 };
 
+// --- fullscreen ---
+// Element fullscreen needs the webkit-prefixed API on iPad Safari; iPhone Safari doesn't
+// support it for non-video elements at all, so there the button simply hides itself rather
+// than sitting dead in the HUD. Requests must run inside a user gesture, which a button tap is.
+const fullscreenBtn = $("fullscreen-btn");
+const docEl = document.documentElement;
+const fullscreenSupported = !!(docEl.requestFullscreen || docEl.webkitRequestFullscreen);
+
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function updateFullscreenBtn() {
+  const active = !!fullscreenElement();
+  // ⛶ enter / ▣ (windowed) exit — same HUD slot, state shown by the glyph + label
+  fullscreenBtn.textContent = active ? "▣" : "⛶";
+  fullscreenBtn.setAttribute("aria-label", active ? "Exit full screen" : "Enter full screen");
+}
+
+if (!fullscreenSupported) {
+  fullscreenBtn.style.display = "none";
+} else {
+  fullscreenBtn.addEventListener("click", () => {
+    if (fullscreenElement()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else if (docEl.requestFullscreen) {
+      // navigationUI:"hide" asks the browser to drop its own chrome too where supported
+      docEl.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+    } else {
+      docEl.webkitRequestFullscreen();
+    }
+  });
+  document.addEventListener("fullscreenchange", updateFullscreenBtn);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenBtn);
+  updateFullscreenBtn();
+}
+
+// Long-pressing a pedal/paddle must never pop a context menu (Android) — holding buttons
+// down for seconds at a time is the normal way to drive.
+wheelScreen.addEventListener("contextmenu", (evt) => evt.preventDefault());
+
 // --- settings panel ---
 $("settings-btn").addEventListener("click", () => {
   ui.renderMappingList($("mapping-list"), () => {});

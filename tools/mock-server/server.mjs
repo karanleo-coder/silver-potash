@@ -144,7 +144,12 @@ const server = https.createServer(tls, (req, res) => {
       return;
     }
     const ext = path.extname(filePath);
-    res.writeHead(200, { "Content-Type": CONTENT_TYPES[ext] || "application/octet-stream" });
+    res.writeHead(200, {
+      "Content-Type": CONTENT_TYPES[ext] || "application/octet-stream",
+      // Same as the real GameServer: force revalidation so a test device never keeps
+      // rendering from a stale/truncated cached copy of the CSS/JS.
+      "Cache-Control": "no-cache",
+    });
     res.end(data);
   });
 });
